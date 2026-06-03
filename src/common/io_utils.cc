@@ -1,0 +1,148 @@
+//
+// Created by xiang on 2021/7/20.
+//
+#include "common/io_utils.h"
+
+#include <glog/logging.h>
+#include <rclcpp/serialization.hpp>
+#include <rosbag2_cpp/reader.hpp>
+#include <rosbag2_cpp/readers/sequential_reader.hpp>
+#include <rosbag2_storage/storage_options.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
+
+namespace sad {
+
+void TxtIO::Go() {
+    if (!fin) {
+        LOG(ERROR) << "未能找到文件";
+        return;
+    }
+
+    while (!fin.eof()) {
+        std::string line;
+        std::getline(fin, line);
+        if (line.empty()) {
+            continue;
+        }
+
+        if (line[0] == '#') {
+            // 以#开头的是注释
+            continue;
+        }
+
+        // load data from line
+        std::stringstream ss;
+        ss << line;
+        std::string data_type;
+        ss >> data_type;
+
+        if (data_type == "IMU" && imu_proc_) {
+            double time, gx, gy, gz, ax, ay, az;
+            ss >> time >> gx >> gy >> gz >> ax >> ay >> az;
+            imu_proc_(IMU(time, Vec3d(gx, gy, gz), Vec3d(ax, ay, az)));
+        } else if (data_type == "ODOM" && odom_proc_) {
+            double time, wl, wr;
+            ss >> time >> wl >> wr;
+            odom_proc_(Odom(time, wl, wr));
+        } else if (data_type == "GNSS" && gnss_proc_) {
+            double time, lat, lon, alt, heading;
+            bool heading_valid;
+            ss >> time >> lat >> lon >> alt >> heading >> heading_valid;
+            gnss_proc_(GNSS(time, 4, Vec3d(lat, lon, alt), heading, heading_valid));
+        }
+    }
+
+    LOG(INFO) << "done.";
+}
+
+std::string RosbagIO::GetLidarTopicName() const {
+    if (dataset_type_ == DatasetType::NCLT) {
+        return nclt_lidar_topic;
+    }
+    if (dataset_type_ == DatasetType::ULHK) {
+        return ulhk_lidar_topic;
+    }
+    if (dataset_type_ == DatasetType::WXB_3D) {
+        return wxb_lidar_topic;
+    }
+    if (dataset_type_ == DatasetType::UTBM) {
+        return utbm_lidar_topic;
+    }
+    if (dataset_type_ == DatasetType::AVIA) {
+        return avia_lidar_topic;
+    }
+    return "";
+}
+void RosbagIO::Go() {
+    LOG(INFO) << "running in " << bag_file_ << ", reg process func: " << process_func_.size();
+
+    rosbag2_storage::StorageOptions storage_options;
+    storage_options.uri = bag_file_;
+    storage_options.storage_id = "sqlite3";
+
+    rosbag2_cpp::ConverterOptions converter_options;
+    converter_options.input_serialization_format = "cdr";
+    converter_options.output_serialization_format = "cdr";
+
+    rosbag2_cpp::Reader reader;
+    
+    try {
+        reader.open(storage_options, converter_options);
+    } catch (const std::exception& e) {
+        LOG(ERROR) << "cannot open " << bag_file_ << ": " << e.what();
+        return;
+    }
+
+    // 创建序列化消息对象
+    auto serialized_msg = std::make_shared<rclcpp::SerializedMessage>();
+
+    while (reader.has_next()) {
+        auto bag_message = reader.read_next();
+        auto topic_name = bag_message->topic_name;
+        
+        // 复制数据到 SerializedMessage
+        serialized_msg->reserve(bag_message->serialized_data->buffer_length);
+        memcpy(serialized_msg->get_rcl_serialized_message().buffer, 
+               bag_message->serialized_data->buffer,
+               bag_message->serialized_data->buffer_length);
+        serialized_msg->get_rcl_serialized_message().buffer_length = 
+            bag_message->serialized_data->buffer_length;
+
+        auto iter = process_func_.find(topic_name);
+        if (iter != process_func_.end()) {
+            iter->second(serialized_msg, topic_name);
+        }
+
+        if (global::FLAG_EXIT) {
+            break;
+        }
+        
+        // 重置消息以便下次使用
+        serialized_msg->get_rcl_serialized_message().buffer_length = 0;
+    }
+
+    LOG(INFO) << "bag " << bag_file_ << " finished.";
+}
+
+std::string RosbagIO::GetIMUTopicName() const {
+    if (dataset_type_ == DatasetType::ULHK) {
+        return ulhk_imu_topic;
+    } else if (dataset_type_ == DatasetType::UTBM) {
+        return utbm_imu_topic;
+    } else if (dataset_type_ == DatasetType::NCLT) {
+        return nclt_imu_topic;
+    } else if (dataset_type_ == DatasetType::WXB_3D) {
+        return wxb_imu_topic;
+    } else if (dataset_type_ == DatasetType::AVIA) {
+        return avia_imu_topic;
+    } else {
+        LOG(ERROR) << "cannot load imu topic name of dataset " << int(dataset_type_);
+    }
+
+    return "";
+}
+
+}  // namespace sad

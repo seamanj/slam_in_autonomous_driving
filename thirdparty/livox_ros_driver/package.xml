@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>livox_ros_driver</name>
+  <version>2.0.0</version>
+  <description>The ROS device driver for Livox 3D LiDARs and Livox Hub</description>
+
+  <maintainer email="dev@livoxtech.com">Livox Dev Team</maintainer>
+  <license>MIT</license>
+  <author email="dev@livoxtech.com">Livox Dev Team</author>
+
+  <!-- ROS 2 Humble 使用 ament_cmake 作为构建工具 -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <!-- 编译依赖 -->
+  <build_depend>rclcpp</build_depend>
+  <build_depend>rclpy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>rosbag2_cpp</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+
+  <!-- 导出依赖 -->
+  <build_export_depend>rclcpp</build_export_depend>
+  <build_export_depend>rclpy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>rosbag2_cpp</build_export_depend>
+  <build_export_depend>pcl_ros</build_export_depend>
+
+  <!-- 运行依赖 -->
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>rosbag2_cpp</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <!-- 通用依赖 -->
+  <depend>git</depend>
+  <depend>apr</depend>
+
+  <!-- 需要生成的消息 -->
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
