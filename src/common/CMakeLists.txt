@@ -10,7 +10,6 @@ include_directories(${velodyne_msgs_INCLUDE_DIRS})
 
 # 打印实际添加的路径
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-message(STATUS "Common include dirs: ${dirs}")
 
 
 

@@ -2,7 +2,7 @@
 // Created by xiang on 2021/11/11.
 //
 
-#include "ch3/static_imu_init.h"
+#include "static_imu_init.h"
 #include "common/math_utils.h"
 
 #include <glog/logging.h>

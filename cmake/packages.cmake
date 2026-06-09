@@ -108,6 +108,7 @@ if(BUILD_WITH_UBUNTU1804)
     include_directories(${PROJECT_SOURCE_DIR}/thirdparty/tbb/oneTBB-2019_U8/oneTBB-2019_U8/include)
     link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tbb_release)
 
+
     set(third_party_libs
             ${rclcpp_LIBRARIES}
             ${rclpy_LIBRARIES}
@@ -125,13 +126,17 @@ if(BUILD_WITH_UBUNTU1804)
 else()
     # Ubuntu 20.04+ / 22.04 使用系统 TBB
     find_package(TBB REQUIRED)
-    
     set(third_party_libs
             ${rclcpp_LIBRARIES}
             ${rclpy_LIBRARIES}
             ${sensor_msgs_LIBRARIES}
             ${std_msgs_LIBRARIES}
-            ${g2o_libs}
+            # g2o（使用现代写法）
+            g2o::core
+            g2o::stuff
+            # rosbag2 依赖（添加这几行）
+            ${rosbag2_cpp_LIBRARIES}
+            ${rosbag2_storage_LIBRARIES}
             ${OpenCV_LIBS}
             ${PCL_LIBRARIES}
             ${Pangolin_LIBRARIES}
