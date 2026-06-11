@@ -39,7 +39,7 @@ bool StaticIMUInit::AddIMU(const IMU& imu) {
         init_imu_deque_.pop_front();
     }
 
-    current_time_ = imu.timestamp_;
+    current_time_ = imu.timestamp_; // tj : 设置当前时间更新
     return false;
 }
 

@@ -36,6 +36,22 @@ void ComputeMeanAndCovDiag(const C& data, D& mean, D& cov_diag, Getter&& getter)
     size_t len = data.size();
     assert(len > 1);
     // clang-format off
+
+    //μ = (x₁ + x₂ + ... + xₙ) / n
+    //σ² = [(x₁-μ)² + (x₂-μ)² + ... + (xₙ-μ)²] / (n-1)
+
+
+    /*
+    直观理解：自由度损失
+
+    计算样本均值 X̄ 后，数据失去了一个自由度：
+
+    - 原始数据 X1, ..., Xn：自由度为 n，可独立变化
+    - 残差 Xi - X̄：自由度为 n-1，因为 Σ(Xi - X̄) = 0 施加了一个约束
+
+    分母用 n-1 恰好补偿了这个损失。
+     */
+
     mean = std::accumulate(data.begin(), data.end(), D::Zero().eval(),
                            [&getter](const D& sum, const auto& data) -> D { return sum + getter(data); }) / len;
     cov_diag = std::accumulate(data.begin(), data.end(), D::Zero().eval(),

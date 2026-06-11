@@ -6,7 +6,7 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
-#include "ch3/eskf.hpp"
+#include "ch3/ex3_eskf_gins/eskf.hpp"
 #include "ch3/static_imu_init.h"
 #include "ch4/imu_preintegration.h"
 #include "ch4/g2o_types.h"
@@ -133,7 +133,7 @@ TEST(PREINTEGRATION_TEST, ACCELERATION_TEST) {
 }
 
 void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS& last_gnss, sad::GNSS& this_gnss,
-              std::shared_ptr<sad::IMUPreintegration>& preinteg, const Vec3d& grav);
+              std::shared_ptr<sad::IMUPreintegration>& pre_integ, const Vec3d& grav);
 
 /// 使用ESKF的Predict, Update来验证预积分的优化过程
 TEST(PREINTEGRATION_TEST, ESKF_TEST) {
@@ -260,7 +260,6 @@ TEST(PREINTEGRATION_TEST, ESKF_TEST) {
 
     SUCCEED();
 }
-
 void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS& last_gnss, sad::GNSS& this_gnss,
               std::shared_ptr<sad::IMUPreintegration>& pre_integ, const Vec3d& grav) {
     assert(pre_integ != nullptr);
@@ -273,8 +272,9 @@ void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS&
     using BlockSolverType = g2o::BlockSolverX;
     using LinearSolverType = g2o::LinearSolverEigen<BlockSolverType::PoseMatrixType>;
 
-    auto* solver = new g2o::OptimizationAlgorithmGaussNewton(
-        g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+    // 改用 Levenberg-Marquardt 算法，更鲁棒
+    auto* solver = new g2o::OptimizationAlgorithmLevenberg(
+        std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>()));
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
 
@@ -329,6 +329,14 @@ void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS&
     edge_inertial->setVertex(4, v1_pose);
     edge_inertial->setVertex(5, v1_vel);
 
+    // 根据 EdgeInertial 的实际维度设置信息矩阵
+    // 从错误信息看，应该是 9x9，而不是 15x15
+    // 可能的维度分配：pose(6) + vel(3) = 9
+    Mat9d info_inertial = Mat9d::Identity();
+    info_inertial.block<6,6>(0,0) *= 1e4;  // 姿态和位置残差权重
+    info_inertial.block<3,3>(6,6) *= 1e2;  // 速度残差权重
+    edge_inertial->setInformation(info_inertial);
+
     auto* rk = new g2o::RobustKernelHuber();
     rk->setDelta(200.0);
     edge_inertial->setRobustKernel(rk);
@@ -337,19 +345,21 @@ void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS&
     edge_inertial->computeError();
     LOG(INFO) << "inertial init err: " << edge_inertial->chi2();
 
+    // 陀螺仪随机游走边
     auto* edge_gyro_rw = new sad::EdgeGyroRW();
     edge_gyro_rw->setVertex(0, v0_bg);
     edge_gyro_rw->setVertex(1, v1_bg);
-    edge_gyro_rw->setInformation(Mat3d::Identity() * 1e6);
+    edge_gyro_rw->setInformation(Mat3d::Identity() * 1e4);
     optimizer.addEdge(edge_gyro_rw);
 
     edge_gyro_rw->computeError();
     LOG(INFO) << "inertial bg rw: " << edge_gyro_rw->chi2();
 
+    // 加速度计随机游走边
     auto* edge_acc_rw = new sad::EdgeAccRW();
     edge_acc_rw->setVertex(0, v0_ba);
     edge_acc_rw->setVertex(1, v1_ba);
-    edge_acc_rw->setInformation(Mat3d::Identity() * 1e6);
+    edge_acc_rw->setInformation(Mat3d::Identity() * 1e4);
     optimizer.addEdge(edge_acc_rw);
 
     edge_acc_rw->computeError();
@@ -357,14 +367,14 @@ void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS&
 
     // GNSS边
     auto edge_gnss0 = new sad::EdgeGNSS(v0_pose, last_gnss.utm_pose_);
-    edge_gnss0->setInformation(Mat6d::Identity() * 1e2);
+    edge_gnss0->setInformation(Mat6d::Identity() * 1e4);
     optimizer.addEdge(edge_gnss0);
 
     edge_gnss0->computeError();
     LOG(INFO) << "gnss0 init err: " << edge_gnss0->chi2();
 
     auto edge_gnss1 = new sad::EdgeGNSS(v1_pose, this_gnss.utm_pose_);
-    edge_gnss1->setInformation(Mat6d::Identity() * 1e2);
+    edge_gnss1->setInformation(Mat6d::Identity() * 1e4);
     optimizer.addEdge(edge_gnss1);
 
     edge_gnss1->computeError();

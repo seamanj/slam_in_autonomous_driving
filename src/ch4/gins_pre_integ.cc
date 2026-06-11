@@ -17,7 +17,18 @@ namespace sad {
 
 void GinsPreInteg::AddImu(const IMU& imu) {
     if (first_gnss_received_ && first_imu_received_) {
-        pre_integ_->Integrate(imu, imu.timestamp_ - last_imu_.timestamp_);
+        // pre_integ_->Integrate(imu, imu.timestamp_ - last_imu_.timestamp_);
+        /*
+        IMU时间戳的含义：在很多IMU数据集中，时间戳标记的是采样区间的结束时刻，而不是起始时刻！
+
+        如果时间戳是区间结束：IMU2(t=1.1) 代表 [1.0, 1.1] 的数据 → 用当前IMU正确
+
+        如果时间戳是区间开始：IMU2(t=1.1) 代表 [1.1, 1.2] 的数据 → 用last_IMU正确
+
+
+
+         */
+        pre_integ_->Integrate(last_imu_, imu.timestamp_ - last_imu_.timestamp_);
     }
 
     first_imu_received_ = true;
@@ -50,7 +61,8 @@ void GinsPreInteg::SetOptions(sad::GinsPreInteg::Options options) {
 }
 
 void GinsPreInteg::AddGnss(const GNSS& gnss) {
-    this_frame_ = std::make_shared<NavStated>(current_time_);
+    this_frame_ = std::make_shared<NavStated>(current_time_); 
+    // tj : current_time_记录上一条记录的时间, 可能是IMU或者GNSS的时间, 它们的记录写在一起, 但是时间是升序排列, 所以这里的参照时间是上一条记录的时间
     this_gnss_ = gnss;
 
     if (!first_gnss_received_) {
@@ -67,12 +79,12 @@ void GinsPreInteg::AddGnss(const GNSS& gnss) {
         this_frame_->bg_ = options_.preinteg_options_.init_bg_;
         this_frame_->ba_ = options_.preinteg_options_.init_ba_;
 
-        pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_);
+        pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); // tj : 重置积分
 
         last_frame_ = this_frame_;
         last_gnss_ = this_gnss_;
         first_gnss_received_ = true;
-        current_time_ = gnss.unix_time_;
+        current_time_ = gnss.unix_time_; // tj:设置当前时间
         return;
     }
 
@@ -83,6 +95,10 @@ void GinsPreInteg::AddGnss(const GNSS& gnss) {
     *this_frame_ = pre_integ_->Predict(*last_frame_, options_.gravity_);
 
     Optimize();
+
+    // tj : 重置后，用优化后的状态更新 last_imu_ 的时间戳
+    last_imu_.timestamp_ = this_frame_->timestamp_;  // 添加这行
+    // 注意：last_imu_ 的测量值（gyro/acce）无法恢复，只能保持原有值
 
     last_frame_ = this_frame_;
     last_gnss_ = this_gnss_;
@@ -103,7 +119,7 @@ void GinsPreInteg::Optimize() {
     using LinearSolverType = g2o::LinearSolverEigen<BlockSolverType::PoseMatrixType>;
 
     auto* solver = new g2o::OptimizationAlgorithmLevenberg(
-        g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+        std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>()));
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
 
@@ -246,9 +262,9 @@ void GinsPreInteg::Optimize() {
     this_frame_->ba_ = v1_ba->estimate();
 
     // 重置integ
-    options_.preinteg_options_.init_bg_ = this_frame_->bg_;
+    options_.preinteg_options_.init_bg_ = this_frame_->bg_;  // tj : 这里重置了bg和ba
     options_.preinteg_options_.init_ba_ = this_frame_->ba_;
-    pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_);
+    pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); // tj : dt_ = 0; 
 }
 
 NavStated GinsPreInteg::GetState() const {

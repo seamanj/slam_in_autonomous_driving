@@ -3,17 +3,6 @@ add_library(${PROJECT_NAME}.ch4
         imu_preintegration.cc
         g2o_types.cc
         )
-
-ADD_EXECUTABLE(test_preintegration test_preintegration.cc)
-ADD_TEST(test_preintegration test_preintegration)
-
-target_link_libraries(test_preintegration
-        gtest pthread glog gflags ${PROJECT_NAME}.ch4 ${PROJECT_NAME}.ch3 ${PROJECT_NAME}.common
-        )
-
-add_executable(run_gins_pre_integ run_gins_pre_integ.cc)
-target_link_libraries(run_gins_pre_integ
-        ${PROJECT_NAME}.ch3
-        ${PROJECT_NAME}.ch4
-        ${g2o_libs}
-        )
+add_subdirectory(ex1_run_gins_pre_integ)
+add_subdirectory(ex2_test_preintegration)
+add_subdirectory(ex3_run_gins_pre_integ_ceres)

@@ -40,7 +40,7 @@ void EdgeInertial::computeError() {
 }
 
 void EdgeInertial::linearizeOplus() {
-    auto* p1 = dynamic_cast<const VertexPose*>(_vertices[0]);
+    auto* p1 = dynamic_cast<const VertexPose*>(_vertices[0]);  // tj : 这里p1是pose, se3
     auto* v1 = dynamic_cast<const VertexVelocity*>(_vertices[1]);
     auto* bg1 = dynamic_cast<const VertexGyroBias*>(_vertices[2]);
     auto* ba1 = dynamic_cast<const VertexAccBias*>(_vertices[3]);
@@ -68,10 +68,20 @@ void EdgeInertial::linearizeOplus() {
     Vec3d pi = p1->estimate().translation();
     Vec3d pj = p2->estimate().translation();
 
-    const SO3 dR = preint_->GetDeltaRotation(bg);
+    const SO3 dR = preint_->GetDeltaRotation(bg);  // tj :  dR 是修正后的
     const SO3 eR = SO3(dR).inverse() * R1T * R2;
     const Vec3d er = eR.log();
     const Mat3d invJr = SO3::jr_inv(eR);
+
+
+    /*
+    edge_inertial->setVertex(0, v0_pose);
+    edge_inertial->setVertex(1, v0_vel);
+    edge_inertial->setVertex(2, v0_bg);
+    edge_inertial->setVertex(3, v0_ba);
+    edge_inertial->setVertex(4, v1_pose);
+    edge_inertial->setVertex(5, v1_vel);
+    */
 
     /// 雅可比矩阵
     /// 注意有3个index, 顶点的，自己误差的，顶点内部变量的
@@ -89,7 +99,7 @@ void EdgeInertial::linearizeOplus() {
     /// 残差对R1, 9x3
     _jacobianOplus[0].setZero();
     // dR/dR1, 4.42
-    _jacobianOplus[0].block<3, 3>(0, 0) = -invJr * (R2.inverse() * R1).matrix();
+    _jacobianOplus[0].block<3, 3>(0, 0) = -invJr * (R2.inverse() * R1).matrix();  // tj : 由于 invJr是修正后, 但是书上是修正前的, 所以还是有点差异的
     // dv/dR1, 4.47
     _jacobianOplus[0].block<3, 3>(3, 0) = SO3::hat(R1T * (vj - vi - grav_ * dt_));
     // dp/dR1, 4.48d

@@ -63,8 +63,11 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
 
     // 增量积分时间
     dt_ += dt;
+    // tj : 变量后面加下划线_, 参数系是第一帧
 }
 
+
+// tj : 公式4.32
 SO3 IMUPreintegration::GetDeltaRotation(const Vec3d &bg) { return dR_ * SO3::exp(dR_dbg_ * (bg - bg_)); }
 
 Vec3d IMUPreintegration::GetDeltaVelocity(const Vec3d &bg, const Vec3d &ba) {
@@ -79,7 +82,7 @@ NavStated IMUPreintegration::Predict(const sad::NavStated &start, const Vec3d &g
     SO3 Rj = start.R_ * dR_;
     Vec3d vj = start.R_ * dv_ + start.v_ + grav * dt_;
     Vec3d pj = start.R_ * dp_ + start.p_ + start.v_ * dt_ + 0.5f * grav * dt_ * dt_;
-
+    // tj : 公式4.7
     auto state = NavStated(start.timestamp_ + dt_, Rj, pj, vj);
     state.bg_ = bg_;
     state.ba_ = ba_;

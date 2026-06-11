@@ -74,12 +74,14 @@ int main(int argc, char** argv) {
     io.SetIMUProcessFunc([&](const sad::IMU& imu) {
           /// IMU 处理函数
           if (!imu_init.InitSuccess()) {
-              imu_init.AddIMU(imu);
+              imu_init.AddIMU(imu); // tj : 这里会设置当前时间为成功前的一条IMU记录的时间, 成功后没有设置current_time_直接返回了
               return;
           }
 
+          // tj : 校准完成, 开始初始化GINS
           /// 需要IMU初始化
           if (!imu_inited) {
+              // tj : 这里会浪费一条IMU记录, 
               // 读取初始零偏，设置GINS
               sad::GinsPreInteg::Options options;
               options.preinteg_options_.init_bg_ = imu_init.GetInitBg();
@@ -87,6 +89,8 @@ int main(int argc, char** argv) {
               options.gravity_ = imu_init.GetGravity();
               gins.SetOptions(options);
               imu_inited = true;
+              // tj : 这里会创建pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); 重置参照时间, 
+              //但是没有设置current_time_，所以current_time_还是之前设置的时间
               return;
           }
 
@@ -96,7 +100,7 @@ int main(int argc, char** argv) {
           }
 
           /// GNSS 也接收到之后，再开始进行预测
-          gins.AddImu(imu);
+          gins.AddImu(imu);  // tj  : 将以最近一个GNSS重置的时间为参照, 进行积分和预测
 
           auto state = gins.GetState();
           save_result(fout, state);
@@ -123,7 +127,7 @@ int main(int argc, char** argv) {
             }
             gnss_convert.utm_pose_.translation() -= origin;
 
-            gins.AddGnss(gnss_convert);
+            gins.AddGnss(gnss_convert);// tj : 这里会重置积分和当前时间 
 
             auto state = gins.GetState();
             save_result(fout, state);

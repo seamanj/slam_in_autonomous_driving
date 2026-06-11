@@ -12,6 +12,7 @@ find_package(Pangolin REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(Glog REQUIRED)
 find_package(g2o REQUIRED)
+find_package(Ceres REQUIRED)
 
 # ROS 2 依赖
 find_package(rclcpp REQUIRED)

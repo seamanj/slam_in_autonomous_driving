@@ -33,7 +33,7 @@ void EdgePriorPoseNavState::linearizeOplus() {
 
     /// 注意有3个index, 顶点的，自己误差的，顶点内部变量的
     _jacobianOplus[0].setZero();
-    _jacobianOplus[0].block<3, 3>(0, 0) = SO3::jr_inv(er);    // dr/dr
+    _jacobianOplus[0].block<3, 3>(0, 0) = SO3::jr_inv(er);    // dr/dr    tj : 公式2.103
     _jacobianOplus[0].block<3, 3>(3, 3) = Mat3d::Identity();  // dp/dp
     _jacobianOplus[1].setZero();
     _jacobianOplus[1].block<3, 3>(6, 0) = Mat3d::Identity();  // dv/dv
