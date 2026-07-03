@@ -5,23 +5,24 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "targetArchitecture": "x64",  // 改为 x64
+            // 使用 CMake Tools 的启动目标路径，或者直接指定
             "program": "${command:cmake.launchTargetPath}",
+            // 如果上面的命令不生效，改为直接指定：
+            // "program": "${workspaceFolder}/build/build_main/bin/run_gins_pre_integ",
             "args": [
-                "--config_file",
-                "${workspaceFolder}/config/myconfig.yaml"
+                "--txt_path=/home/seamanj/Workspace/cpp_projects/slam_in_autonomous_driving/data/ch3/10.txt"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin",
+            "cwd": "${workspaceFolder}/build/build_main/bin",
             "environment": [
                 {
-                    "name": "PATH",
-                    "value": "${workspaceFolder}/build/lib;${env:PATH}"  // 修复环境变量顺序
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "${workspaceFolder}/build/build_main/lib:${workspaceFolder}/build/install/lib:/opt/ros/humble/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}"
                 }
             ],
-            "externalConsole": true,  // 改为 true 以便看到输出
+            "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "D:\\Software\\msys64\\ucrt64\\bin\\gdb.exe",
+            "miDebuggerPath": "/usr/bin/gdb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

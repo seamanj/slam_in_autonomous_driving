@@ -2,7 +2,7 @@
 // Created by xiang on 2021/11/11.
 //
 
-#include "eskf.hpp"
+#include "ch3/eskf.hpp"
 #include "ch3/static_imu_init.h"
 #include "common/io_utils.h"
 #include "tools/ui/pangolin_window.h"
@@ -25,7 +25,7 @@ DEFINE_bool(with_odom, true, "是否加入轮速计信息");
  */
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

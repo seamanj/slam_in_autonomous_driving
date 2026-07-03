@@ -28,6 +28,7 @@ namespace sad {
  */
 class GinsPreInteg {
    public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /// GINS 配置项
     struct Options {
         Options() {}

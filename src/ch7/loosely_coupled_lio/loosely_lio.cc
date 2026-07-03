@@ -169,9 +169,9 @@ void LooselyLIO::Align() {
     frame_num_++;
 }
 
-void LooselyLIO::PCLCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LooselyLIO::PCLCallBack(const sensor_msgs::msg::PointCloud2::SharedPtr msg) { sync_->ProcessCloud(msg); }
 
-void LooselyLIO::LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LooselyLIO::LivoxPCLCallBack(const livox_ros_driver::msg::CustomMsg::SharedPtr msg) { sync_->ProcessCloud(msg); }
 
 void LooselyLIO::IMUCallBack(IMUPtr msg_in) { sync_->ProcessIMU(msg_in); }
 

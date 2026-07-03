@@ -1,7 +1,7 @@
 //
 // Created by xiang on 2022/1/4.
 //
-
+#include <gflags/gflags.h>  // 添加这一行
 #include <glog/logging.h>
 #include <iomanip>
 #include <memory>
@@ -29,7 +29,7 @@ DEFINE_bool(with_ui, true, "是否显示图形界面");
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

@@ -19,7 +19,7 @@ DEFINE_double(voxel_size, 0.1, "导出地图分辨率");
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

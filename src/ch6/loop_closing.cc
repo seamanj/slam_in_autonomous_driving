@@ -82,9 +82,17 @@ bool LoopClosing::DetectLoopCandidates() {
     return !current_candidates_.empty();
 }
 
-void LoopClosing::MatchInHistorySubmaps() {
+void LoopClosing:: MatchInHistorySubmaps() {
     // 我们先把要检查的scan, pose和submap存到离线文件, 把mr match调完了再实际上线
-    // current_frame_->Dump("./data/ch6/frame_" + std::to_string(current_frame_->id_) + ".txt");
+     std::string exe_dir = sad::GetExecutableDir();
+    if (!exe_dir.empty()) {
+        std::string dump_path = exe_dir + "/data/ch6/frame_" + std::to_string(current_frame_->id_) + ".txt";
+        current_frame_->Dump(dump_path);
+    } else {
+        LOG(WARNING) << "Cannot get executable directory, using default output path";
+        // 使用相对路径作为备选
+        current_frame_->Dump("./data/ch6/frame_" + std::to_string(current_frame_->id_) + ".txt");
+    }
 
     for (const size_t& can : current_candidates_) {
         auto mr = submap_to_field_.at(submaps_[can]);
@@ -128,7 +136,7 @@ void LoopClosing::Optimize() {
     using BlockSolverType = g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>>;
     using LinearSolverType = g2o::LinearSolverCholmod<BlockSolverType::PoseMatrixType>;
     auto* solver = new g2o::OptimizationAlgorithmLevenberg(
-        g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+        std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>()));
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
 

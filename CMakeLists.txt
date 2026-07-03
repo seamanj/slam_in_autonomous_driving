@@ -3,12 +3,14 @@ project(slam_in_auto_driving)
 
 # 设置编译类型
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
+    set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-w")
+
+# 修改这里：保留 -w 但添加必要的定义
+set(CMAKE_CXX_FLAGS "-w -DEIGEN_USE_STD_CSTRING")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -g -ggdb ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "-g ${CMAKE_CXX_FLAGS}")
 

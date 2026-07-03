@@ -24,7 +24,12 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
         } else {
             ndt_.SetTarget(local_map_);
         }
-
+        // ✅ 添加：第一帧也显示
+        if (viewer_ != nullptr) {
+            CloudPtr scan_world(new PointCloudType);
+            pcl::transformPointCloud(*scan, *scan_world, pose.matrix().cast<float>());
+            viewer_->SetPoseAndCloud(pose, scan_world);
+        }
         return;
     }
 

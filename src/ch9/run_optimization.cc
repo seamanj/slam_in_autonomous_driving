@@ -14,7 +14,7 @@ DEFINE_int64(stage, 1, "运行第1阶段或第2阶段优化");
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

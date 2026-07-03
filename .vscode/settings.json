@@ -7,33 +7,28 @@
         "string": "cpp",
         "string_view": "cpp"
     },
-    "C_Cpp.default.compilerPath": "D:\\Software\\msys64\\ucrt64\\bin\\g++.exe",
+    // 移除 Windows 的编译器路径（在 Linux 下不需要）
+    // "C_Cpp.default.compilerPath": "D:\\Software\\msys64\\ucrt64\\bin\\g++.exe",
+    
+    // 添加 CMake Tools 配置
+    "cmake.buildDirectory": "${workspaceFolder}/build/build_main",
+    "cmake.configureSettings": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "${workspaceFolder}/build/install;/opt/ros/humble;/usr/local",
+        "CMAKE_CXX_FLAGS": "-UHAVE_CUDA -std=c++17",
+        "CMAKE_C_FLAGS": "-UHAVE_CUDA"
+    },
+    
     "cmake.debugConfig": {
         "args": [
-            "--config_file=${workspaceFolder}/config/myconfig.yaml"
+            "--txt_path=/home/seamanj/Workspace/cpp_projects/slam_in_autonomous_driving/data/ch3/10.txt"
         ],
-        "cwd": "${workspaceFolder}/build/bin",
+        "cwd": "${workspaceFolder}/build/build_main/bin",
         "environment": [
             {
-                "name": "PATH",
-                "value": "${workspaceFolder}/build/lib;${env:PATH}"
+                "name": "LD_LIBRARY_PATH",
+                "value": "${workspaceFolder}/build/build_main/lib:${workspaceFolder}/build/install/lib:/opt/ros/humble/lib:/usr/local/lib:${env:LD_LIBRARY_PATH}"
             }
         ]
     }
 }
-
-
-
-// settings.json 中的 cmake.debugConfig
-// 使用者：CMake Tools 扩展
-
-// 触发方式：点击 VSCode 底部状态栏的虫子图标 🔴 或者按 Ctrl+F5
-
-// 作用：配置 CMake Tools 自己的调试器
-
-// launch.json
-// 使用者：VSCode 原生的 C++ 调试器（cppdbg）
-
-// 触发方式：按 F5 或者点击侧边栏的虫子图标 🐞，然后选择配置
-
-// 作用：配置 VSCode 原生的调试器

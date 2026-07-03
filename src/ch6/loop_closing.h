@@ -12,7 +12,8 @@
 #include <fstream>
 #include <map>
 #include <memory>
-
+#include "common/path_utils.h"  
+#include <glog/logging.h>
 namespace sad {
 
 /**
@@ -35,7 +36,16 @@ class LoopClosing {
         bool valid_ = true;
     };
 
-    LoopClosing() { debug_fout_.open("./data/ch6/loops.txt"); }
+    LoopClosing() { 
+        std::string exe_dir = sad::GetExecutableDir();
+    if (!exe_dir.empty()) {
+        debug_fout_.open(exe_dir + "/data/ch6/loops.txt"); 
+    } else {
+        LOG(WARNING) << "Cannot get executable directory, using default output path";
+        debug_fout_.open("./data/ch6/loops.txt"); 
+    }
+
+    }
 
     /// 添加最近的submap，这个submap可能正在构建中
     void AddNewSubmap(std::shared_ptr<Submap> submap);

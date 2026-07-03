@@ -15,79 +15,11 @@ target_link_libraries(${PROJECT_NAME}.ch6
         ${PROJECT_NAME}.common
         )
 
-add_executable(test_2dlidar_io
-        test_2dlidar_io.cc
-        )
 
-target_link_libraries(test_2dlidar_io
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        ${third_party_libs}
-        )
 
-add_executable(test_2d_icp_s2s
-        test_2d_icp_s2s.cc
-        )
-
-target_link_libraries(test_2d_icp_s2s
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        )
-
-add_executable(test_2d_icp_likelihood
-        test_2d_icp_likelihood.cc
-        )
-
-target_link_libraries(test_2d_icp_likelihood
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        ${g2o_libs}
-        )
-
-add_executable(test_occupancy_grid
-        test_occupancy_grid.cc
-        )
-
-target_link_libraries(test_occupancy_grid
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        ${g2o_libs}
-        )
-
-add_executable(test_2d_mapping
-        test_2d_mapping.cc
-        )
-
-target_link_libraries(test_2d_mapping
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        ${g2o_libs}
-        )
-
-add_executable(test_mr_matching
-        test_mr_matching.cc
-        )
-
-target_link_libraries(test_mr_matching
-        ${PROJECT_NAME}.ch6
-        ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
-        glog gflags
-        ${PCL_LIBRARIES}
-        ${g2o_libs}
-        )
+add_subdirectory(ex1_test_2dlidar_io)
+add_subdirectory(ex2_test_2d_icp_s2s)
+add_subdirectory(ex3_test_2d_icp_likelihood)
+add_subdirectory(ex4_test_occupancy_grid)
+add_subdirectory(ex5_test_2d_mapping)
+add_subdirectory(ex6_test_mr_matching)

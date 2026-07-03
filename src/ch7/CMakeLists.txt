@@ -20,79 +20,11 @@ target_link_libraries(${PROJECT_NAME}.ch7
         ${third_party_libs}
         )
 
-add_executable(test_icp
-        test/test_icp.cc
-        )
 
-target_link_libraries(test_icp
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(test_ndt_lo
-        test/test_ndt_lo.cc
-        )
-
-target_link_libraries(test_ndt_lo
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(test_inc_ndt_lo
-        test/test_inc_ndt_lo.cc
-        )
-
-target_link_libraries(test_inc_ndt_lo
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(test_feature_extraction
-        test/test_feature_extraction.cc
-        )
-
-target_link_libraries(test_feature_extraction
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(test_loam_odom
-        test/test_loam_odom.cc
-        )
-
-target_link_libraries(test_loam_odom
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(test_loosely_lio
-        test/test_loosely_lio.cc
-        )
-
-target_link_libraries(test_loosely_lio
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
-
-add_executable(run_gen_simu_data
-        test/run_gen_simu_data.cc
-        )
-
-target_link_libraries(run_gen_simu_data
-        ${PROJECT_NAME}.ch5
-        ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
-        )
+add_subdirectory(ex1_test_icp)
+add_subdirectory(ex2_test_ndt_lo)
+add_subdirectory(ex3_test_inc_ndt_lo)
+add_subdirectory(ex4_test_feature_extraction)
+add_subdirectory(ex5_test_loam_odom)
+add_subdirectory(ex6_test_loosely_lio)
+add_subdirectory(ex7_run_gen_simu_data)

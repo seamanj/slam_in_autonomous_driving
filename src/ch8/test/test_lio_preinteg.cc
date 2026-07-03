@@ -17,7 +17,7 @@ DEFINE_bool(display_map, true, "display map?");
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

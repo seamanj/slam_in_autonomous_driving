@@ -23,7 +23,7 @@ DEFINE_string(dump_to, "./data/ch9/", "导出的目标路径");
 int main(int argc, char** argv) {
     google::ParseCommandLineFlags(&argc, &argv, true);
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
 
     using namespace sad;

@@ -23,7 +23,7 @@ bool KdTree::BuildTree(const CloudPtr &cloud) {
     }
 
     Clear();
-    Reset();
+    Reset(); // create the root node
 
     IndexVec idx(cloud->size());
     for (int i = 0; i < cloud->points.size(); ++i) {
@@ -50,14 +50,14 @@ void KdTree::Insert(const IndexVec &points, KdTreeNode *node) {
     IndexVec left, right;
     if (!FindSplitAxisAndThresh(points, node->axis_index_, node->split_thresh_, left, right)) {
         size_++;
-        node->point_idx_ = points[0];
+        node->point_idx_ = points[0];  // tj : 叶子节点才会设置point_idx_
         return;
     }
 
     const auto create_if_not_empty = [&node, this](KdTreeNode *&new_node, const IndexVec &index) {
         if (!index.empty()) {
             new_node = new KdTreeNode;
-            new_node->id_ = tree_node_id_++;
+            new_node->id_ = tree_node_id_++; // tj : 每个节点会有一个id_
             Insert(index, new_node);
         }
     };

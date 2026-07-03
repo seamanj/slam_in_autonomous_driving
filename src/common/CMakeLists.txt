@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME}.common
         global_flags.cc
         g2o_types.cc
         point_cloud_utils.cc
+        path_utils.cc
         )
 
 target_link_libraries(${PROJECT_NAME}.common

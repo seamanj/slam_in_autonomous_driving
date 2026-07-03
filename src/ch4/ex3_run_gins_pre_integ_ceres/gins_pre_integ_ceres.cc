@@ -6,23 +6,193 @@
 #include "ceres_types.h"
 
 #include <ceres/ceres.h>
+#include <ceres/manifold.h>
 #include <glog/logging.h>
 
 namespace sad {
 
+// 自定义 PoseManifold: 7维参数块 [x, y, z, qx, qy, qz, qw]
+// 其中前3维是平移（欧几里得），后4维是四元数（SO3）
+class PoseManifold : public ceres::Manifold {
+public:
+    int AmbientSize() const override { return 7; }
+    int TangentSize() const override { return 6; }  // 3 平移 + 3 旋转
+
+    bool Plus(const double* x, const double* delta, double* x_plus_delta) const override {
+        // x: [x, y, z, qx, qy, qz, qw]
+        // delta: [dx, dy, dz, dqx, dqy, dqz] (6维)
+        
+        // 平移部分: 直接加
+        x_plus_delta[0] = x[0] + delta[0];
+        x_plus_delta[1] = x[1] + delta[1];
+        x_plus_delta[2] = x[2] + delta[2];
+        
+        // 四元数部分: 使用增量旋转
+        Eigen::Quaterniond q(x[6], x[3], x[4], x[5]);  // w, x, y, z
+        
+        // 构造增量四元数 (delta[3], delta[4], delta[5] 是旋转向量)
+        Eigen::Vector3d omega(delta[3], delta[4], delta[5]);
+        double theta = omega.norm();
+        Eigen::Quaterniond dq;
+        if (theta < 1e-10) {
+            dq = Eigen::Quaterniond::Identity();
+        } else {
+            Eigen::Vector3d axis = omega / theta;
+            dq = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis));
+        }
+        
+        // 应用旋转
+        Eigen::Quaterniond q_new = dq * q;
+        q_new.normalize();
+        
+        x_plus_delta[3] = q_new.x();
+        x_plus_delta[4] = q_new.y();
+        x_plus_delta[5] = q_new.z();
+        x_plus_delta[6] = q_new.w();
+        
+        return true;
+    }
+
+    bool Minus(const double* y, const double* x, double* y_minus_x) const override {
+        // y - x 在切空间中的表示
+        // 平移部分: 直接减
+        y_minus_x[0] = y[0] - x[0];
+        y_minus_x[1] = y[1] - x[1];
+        y_minus_x[2] = y[2] - x[2];
+        
+        // 旋转部分: 计算相对旋转
+        Eigen::Quaterniond qx(x[6], x[3], x[4], x[5]);
+        Eigen::Quaterniond qy(y[6], y[3], y[4], y[5]);
+        
+        Eigen::Quaterniond dq = qy * qx.inverse();
+        dq.normalize();
+        
+        // 转换为轴角
+        Eigen::AngleAxisd aa(dq);
+        Eigen::Vector3d omega = aa.angle() * aa.axis();
+        
+        y_minus_x[3] = omega.x();
+        y_minus_x[4] = omega.y();
+        y_minus_x[5] = omega.z();
+        
+        return true;
+    }
+
+    // PlusJacobian: 计算 Plus 操作关于 x 和 delta 的雅可比矩阵
+    bool PlusJacobian(const double* x, double* jacobian) const override {
+        // jacobian 是 7x6 的矩阵 (行优先)
+        // 对于平移部分: 雅可比是单位矩阵
+        // 对于旋转部分: 雅可比是 QuaternionParameterization 的雅可比
+        
+        // 初始化雅可比为零
+        std::fill(jacobian, jacobian + 7 * 6, 0.0);
+        
+        // 平移部分: 前3行，前3列是单位矩阵
+        for (int i = 0; i < 3; ++i) {
+            jacobian[i * 6 + i] = 1.0;
+        }
+        
+        // 旋转部分: 后4行，后3列
+        // 使用四元数的左乘雅可比
+        Eigen::Quaterniond q(x[6], x[3], x[4], x[5]);
+        
+        // 计算 d(q * dq) / d(dq) 在 dq = 0 处的雅可比
+        // 这是 4x3 的矩阵
+        Eigen::Matrix<double, 4, 3> quat_jacobian;
+        quat_jacobian.setZero();
+        
+        // 对于四元数 q = [w, x, y, z]，左乘增量旋转的雅可比
+        // 在 dq = [0, 0, 0, 1] 处 (单位四元数)
+        // d(q * dq)/d(dq_rot) 的雅可比
+        const double w = q.w();
+        const double x_q = q.x();
+        const double y_q = q.y();
+        const double z_q = q.z();
+        
+        // 左乘四元数的雅可比 (4x3)
+        // 参考: https://github.com/ceres-solver/ceres-solver/issues/696
+        quat_jacobian(0, 0) = -0.5 * x_q;  // d(w)/d(dx)
+        quat_jacobian(0, 1) = -0.5 * y_q;  // d(w)/d(dy)
+        quat_jacobian(0, 2) = -0.5 * z_q;  // d(w)/d(dz)
+        
+        quat_jacobian(1, 0) = 0.5 * w;     // d(x_q)/d(dx)
+        quat_jacobian(1, 1) = 0.5 * z_q;   // d(x_q)/d(dy)
+        quat_jacobian(1, 2) = -0.5 * y_q;  // d(x_q)/d(dz)
+        
+        quat_jacobian(2, 0) = -0.5 * z_q;  // d(y_q)/d(dx)
+        quat_jacobian(2, 1) = 0.5 * w;     // d(y_q)/d(dy)
+        quat_jacobian(2, 2) = 0.5 * x_q;   // d(y_q)/d(dz)
+        
+        quat_jacobian(3, 0) = 0.5 * y_q;   // d(z_q)/d(dx)
+        quat_jacobian(3, 1) = -0.5 * x_q;  // d(z_q)/d(dy)
+        quat_jacobian(3, 2) = 0.5 * w;     // d(z_q)/d(dz)
+        
+        // 将四元数雅可比放入总雅可比的旋转部分 (后4行，后3列)
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                jacobian[(3 + i) * 6 + (3 + j)] = quat_jacobian(i, j);
+            }
+        }
+        
+        return true;
+    }
+
+    // MinusJacobian: 计算 Minus 操作关于 x 的雅可比矩阵
+    bool MinusJacobian(const double* x, double* jacobian) const override {
+        // jacobian 是 6x7 的矩阵 (行优先)
+        // 对于平移部分: 雅可比是单位矩阵
+        // 对于旋转部分: 雅可比是 QuaternionParameterization 的雅可比
+        
+        std::fill(jacobian, jacobian + 6 * 7, 0.0);
+        
+        // 平移部分: 前3行，前3列是单位矩阵
+        for (int i = 0; i < 3; ++i) {
+            jacobian[i * 7 + i] = 1.0;
+        }
+        
+        // 旋转部分: 后3行，后4列
+        Eigen::Quaterniond q(x[6], x[3], x[4], x[5]);
+        
+        // 计算 d(log(q * qx^{-1})) / d(qx) 的雅可比
+        // 这是 3x4 的矩阵
+        Eigen::Matrix<double, 3, 4> quat_jacobian;
+        quat_jacobian.setZero();
+        
+        const double w = q.w();
+        const double x_q = q.x();
+        const double y_q = q.y();
+        const double z_q = q.z();
+        
+        // Minus 的雅可比是 Plus 雅可比的逆
+        // 对于四元数，这个雅可比是：
+        quat_jacobian(0, 0) = -x_q;  // d(dx)/d(w)
+        quat_jacobian(0, 1) = w;     // d(dx)/d(x)
+        quat_jacobian(0, 2) = z_q;   // d(dx)/d(y)
+        quat_jacobian(0, 3) = -y_q;  // d(dx)/d(z)
+        
+        quat_jacobian(1, 0) = -y_q;  // d(dy)/d(w)
+        quat_jacobian(1, 1) = -z_q;  // d(dy)/d(x)
+        quat_jacobian(1, 2) = w;     // d(dy)/d(y)
+        quat_jacobian(1, 3) = x_q;   // d(dy)/d(z)
+        
+        quat_jacobian(2, 0) = -z_q;  // d(dz)/d(w)
+        quat_jacobian(2, 1) = y_q;   // d(dz)/d(x)
+        quat_jacobian(2, 2) = -x_q;  // d(dz)/d(y)
+        quat_jacobian(2, 3) = w;     // d(dz)/d(z)
+        
+        // 将四元数雅可比放入总雅可比的旋转部分 (后3行，后4列)
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                jacobian[(3 + i) * 7 + (3 + j)] = quat_jacobian(i, j);
+            }
+        }
+        
+        return true;
+    }
+};
+
 void GinsPreInteg::AddImu(const IMU& imu) {
     if (first_gnss_received_ && first_imu_received_) {
-        // pre_integ_->Integrate(imu, imu.timestamp_ - last_imu_.timestamp_);
-        /*
-        IMU时间戳的含义：在很多IMU数据集中，时间戳标记的是采样区间的结束时刻，而不是起始时刻！
-
-        如果时间戳是区间结束：IMU2(t=1.1) 代表 [1.0, 1.1] 的数据 → 用当前IMU正确
-
-        如果时间戳是区间开始：IMU2(t=1.1) 代表 [1.1, 1.2] 的数据 → 用last_IMU正确
-
-
-
-         */
         pre_integ_->Integrate(last_imu_, imu.timestamp_ - last_imu_.timestamp_);
     }
 
@@ -57,16 +227,13 @@ void GinsPreInteg::SetOptions(sad::GinsPreInteg::Options options) {
 
 void GinsPreInteg::AddGnss(const GNSS& gnss) {
     this_frame_ = std::make_shared<NavStated>(current_time_); 
-    // tj : current_time_记录上一条记录的时间, 可能是IMU或者GNSS的时间, 它们的记录写在一起, 但是时间是升序排列, 所以这里的参照时间是上一条记录的时间
     this_gnss_ = gnss;
 
     if (!first_gnss_received_) {
         if (!gnss.heading_valid_) {
-            // 要求首个GNSS必须有航向
             return;
         }
 
-        // 首个gnss信号，将初始pose设置为该gnss信号
         this_frame_->timestamp_ = gnss.unix_time_;
         this_frame_->p_ = gnss.utm_pose_.translation();
         this_frame_->R_ = gnss.utm_pose_.so3();
@@ -74,16 +241,15 @@ void GinsPreInteg::AddGnss(const GNSS& gnss) {
         this_frame_->bg_ = options_.preinteg_options_.init_bg_;
         this_frame_->ba_ = options_.preinteg_options_.init_ba_;
 
-        pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); // tj : 重置积分
+        pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_);
 
         last_frame_ = this_frame_;
         last_gnss_ = this_gnss_;
         first_gnss_received_ = true;
-        current_time_ = gnss.unix_time_; // tj:设置当前时间
+        current_time_ = gnss.unix_time_;
         return;
     }
 
-    // 积分到GNSS时刻
     pre_integ_->Integrate(last_imu_, gnss.unix_time_ - current_time_);
 
     current_time_ = gnss.unix_time_;
@@ -91,9 +257,7 @@ void GinsPreInteg::AddGnss(const GNSS& gnss) {
 
     Optimize();
 
-    // tj : 重置后，用优化后的状态更新 last_imu_ 的时间戳
-    last_imu_.timestamp_ = this_frame_->timestamp_;  // 添加这行
-    // 注意：last_imu_ 的测量值（gyro/acce）无法恢复，只能保持原有值
+    last_imu_.timestamp_ = this_frame_->timestamp_;
 
     last_frame_ = this_frame_;
     last_gnss_ = this_gnss_;
@@ -106,7 +270,6 @@ void GinsPreInteg::AddOdom(const sad::Odom& odom) {
 
 void GinsPreInteg::Optimize() {
     if (pre_integ_->dt_ < 1e-3) {
-        // 未得到积分
         return;
     }
 
@@ -146,12 +309,11 @@ void GinsPreInteg::Optimize() {
 
     problem.AddParameterBlock(pose0, 7);
     problem.AddParameterBlock(pose1, 7);
-    problem.SetParameterization(
-        pose0, new ceres::ProductParameterization(new ceres::IdentityParameterization(3),
-                                                  new ceres::EigenQuaternionParameterization()));
-    problem.SetParameterization(
-        pose1, new ceres::ProductParameterization(new ceres::IdentityParameterization(3),
-                                                  new ceres::EigenQuaternionParameterization()));
+    
+    // 使用自定义的 PoseManifold
+    problem.SetManifold(pose0, new PoseManifold());
+    problem.SetManifold(pose1, new PoseManifold());
+    
     problem.AddParameterBlock(vel0, 3);
     problem.AddParameterBlock(vel1, 3);
     problem.AddParameterBlock(bg0, 3);
@@ -187,7 +349,6 @@ void GinsPreInteg::Optimize() {
 
     Vec3d vel_odom = Vec3d::Zero();
     if (last_odom_set_) {
-        // velocity obs
         double velo_l =
             options_.wheel_radius_ * last_odom_.left_pulse_ / options_.circle_pulse_ * 2 * M_PI / options_.odom_span_;
         double velo_r =
@@ -199,7 +360,6 @@ void GinsPreInteg::Optimize() {
             new ceres::AutoDiffCostFunction<OdomResidual, 3, 3, 7>(new OdomResidual(vel_odom, options_.odom_info_));
         problem.AddResidualBlock(odom_cost, nullptr, vel1, pose1);
 
-        // 重置odom数据到达标志位，等待最新的odom数据
         last_odom_set_ = false;
     }
 
@@ -226,10 +386,9 @@ void GinsPreInteg::Optimize() {
         this_frame_->ba_[i] = ba1[i];
     }
 
-    // 重置integ
-    options_.preinteg_options_.init_bg_ = this_frame_->bg_;  // tj : 这里重置了bg和ba
+    options_.preinteg_options_.init_bg_ = this_frame_->bg_;
     options_.preinteg_options_.init_ba_ = this_frame_->ba_;
-    pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); // tj : dt_ = 0; 
+    pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_);
 }
 
 NavStated GinsPreInteg::GetState() const {

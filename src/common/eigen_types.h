@@ -5,6 +5,12 @@
 #ifndef MAPPING_EIGEN_TYPES_H
 #define MAPPING_EIGEN_TYPES_H
 
+// ===== 添加这两行：禁用 Eigen 对齐断言 =====
+#define EIGEN_DONT_ALIGN_STATICALLY 1
+#define EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT 1
+// ===========================================
+
+
 // 引入Eigen头文件与常用类型
 #include <Eigen/Core>
 #include <Eigen/Dense>

@@ -185,7 +185,7 @@ void OccupancyMap::BresenhamFilling(const Vec2i& p1, const Vec2i& p2) {
     dx = abs(dx);
     dy = abs(dy);
     int x = p1.x();
-    int y = p1.y();
+    int y = p1.y(); 
 
     if (dx > dy) {
         // 以x为增量

@@ -1,7 +1,7 @@
 //
 // Created by xiang on 2021/11/5.
 //
-
+#include <gflags/gflags.h>  // 添加这一行
 #include <glog/logging.h>
 #include <iomanip>
 
@@ -17,7 +17,7 @@ DEFINE_bool(with_ui, true, "是否显示图形界面");
 /// 该程序需要输入data/ch3/下的文本文件，同时它将状态输出到data/ch3/state.txt中，在UI中也可以观察到车辆运动
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

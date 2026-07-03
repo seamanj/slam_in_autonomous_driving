@@ -12,7 +12,13 @@ DEFINE_string(source, "./data/ch5/first.pcd", "第1个点云路径");
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    
+    // ===== 使用 GLOG 宏 =====
+    FLAGS_stderrthreshold = google::GLOG_INFO;  // 如果可用
+    // 或者直接使用数字
+    // FLAGS_stderrthreshold = 0;
+    // ========================
+    
     FLAGS_colorlogtostderr = true;
     google::ParseCommandLineFlags(&argc, &argv, true);
 

@@ -6,7 +6,7 @@
 #include <glog/logging.h>
 #include <gtest/gtest.h>
 
-#include "ch3/ex3_eskf_gins/eskf.hpp"
+#include "ch3/eskf.hpp"
 #include "ch3/static_imu_init.h"
 #include "ch4/imu_preintegration.h"
 #include "ch4/g2o_types.h"
@@ -398,7 +398,7 @@ void Optimize(sad::NavStated& last_state, sad::NavStated& this_state, sad::GNSS&
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
-    FLAGS_stderrthreshold = google::INFO;
+    FLAGS_stderrthreshold = google::GLOG_INFO;
     FLAGS_colorlogtostderr = true;
 
     testing::InitGoogleTest(&argc, argv);

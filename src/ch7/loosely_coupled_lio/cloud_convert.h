@@ -1,6 +1,7 @@
 #pragma once
 
-#include <livox_ros_driver/CustomMsg.h>
+#include <livox_ros_driver/msg/custom_msg.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <pcl/point_cloud.h>
@@ -34,22 +35,22 @@ class CloudConvert {
      * @param msg
      * @param pcl_out
      */
-    void Process(const livox_ros_driver::CustomMsg::ConstPtr &msg, FullCloudPtr &pcl_out);
+    void Process(const livox_ros_driver::msg::CustomMsg::SharedPtr msg, FullCloudPtr &pcl_out);
 
     /**
      * 处理sensor_msgs::PointCloud2点云
      * @param msg
      * @param pcl_out
      */
-    void Process(const sensor_msgs::PointCloud2::ConstPtr &msg, FullCloudPtr &pcl_out);
+    void Process(const sensor_msgs::msg::PointCloud2::SharedPtr msg, FullCloudPtr &pcl_out);
 
     /// 从YAML中读取参数
     void LoadFromYAML(const std::string &yaml);
 
    private:
-    void AviaHandler(const livox_ros_driver::CustomMsg::ConstPtr &msg);
-    void Oust64Handler(const sensor_msgs::PointCloud2::ConstPtr &msg);
-    void VelodyneHandler(const sensor_msgs::PointCloud2::ConstPtr &msg);
+    void AviaHandler(const livox_ros_driver::msg::CustomMsg::SharedPtr msg);
+    void Oust64Handler(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
+    void VelodyneHandler(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
     FullPointCloudType cloud_full_, cloud_out_;  // 输出点云
     LidarType lidar_type_ = LidarType::AVIA;     // 雷达类型

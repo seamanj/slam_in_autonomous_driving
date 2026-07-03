@@ -53,7 +53,17 @@ class DirectNDTLO {
 
     /// 存储地图(viewer里）
     void SaveMap(const std::string& map_path);
-
+    void CloseViewer() {
+        LOG(INFO) << "Closing viewer...";
+        if (viewer_) {
+            LOG(INFO) << "Viewer exists, calling close()";
+            viewer_->close();
+            viewer_ = nullptr;
+            LOG(INFO) << "Viewer closed successfully";
+        } else {
+            LOG(INFO) << "Viewer is already null";
+        }
+    }
    private:
     /// 与local map进行配准
     SE3 AlignWithLocalMap(CloudPtr scan);

@@ -76,6 +76,7 @@ std::string RosbagIO::GetLidarTopicName() const {
     }
     return "";
 }
+
 void RosbagIO::Go() {
     LOG(INFO) << "running in " << bag_file_ << ", reg process func: " << process_func_.size();
 
@@ -143,6 +144,39 @@ std::string RosbagIO::GetIMUTopicName() const {
     }
 
     return "";
+}
+
+// ========== 添加 AddImuHandle 的实现 ==========
+RosbagIO& RosbagIO::AddImuHandle(ImuHandle f) {
+    std::string imu_topic = GetIMUTopicName();
+    
+    // 如果无法从dataset_type获取topic，记录错误
+    if (imu_topic.empty()) {
+        LOG(ERROR) << "Cannot find IMU topic for dataset type: " << int(dataset_type_);
+        return *this;
+    }
+    
+    return AddHandle(imu_topic, [f](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
+        auto imu_msg = std::make_shared<ImuMsg>();
+        rclcpp::Serialization<ImuMsg> serialization;
+        serialization.deserialize_message(msg.get(), imu_msg.get());
+        
+        // 将 sensor_msgs::msg::Imu 转换为 sad::IMUPtr
+        IMUPtr imu_ptr = std::make_shared<IMU>();
+        imu_ptr->timestamp_ = imu_msg->header.stamp.sec + imu_msg->header.stamp.nanosec * 1e-9;
+        
+        // 角速度 (rad/s)
+        imu_ptr->gyro_ = Vec3d(imu_msg->angular_velocity.x,
+                               imu_msg->angular_velocity.y,
+                               imu_msg->angular_velocity.z);
+        
+        // 加速度 (m/s^2)
+        imu_ptr->acce_ = Vec3d(imu_msg->linear_acceleration.x,
+                               imu_msg->linear_acceleration.y,
+                               imu_msg->linear_acceleration.z);
+        
+        return f(imu_ptr);
+    });
 }
 
 }  // namespace sad

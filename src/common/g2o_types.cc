@@ -18,7 +18,18 @@ void EdgePriorPoseNavState::computeError() {
     auto* vg = dynamic_cast<const VertexGyroBias*>(_vertices[2]);
     auto* va = dynamic_cast<const VertexAccBias*>(_vertices[3]);
 
-    const Vec3d er = SO3(state_.R_.matrix().transpose() * vp->estimate().so3().matrix()).log();
+    // ===== 安全计算旋转误差 =====
+    // 计算相对旋转矩阵
+    Eigen::Matrix3d R_diff = state_.R_.matrix().transpose() * vp->estimate().so3().matrix();
+    
+    // 通过四元数进行"净化"，确保是正交矩阵
+    Eigen::Quaterniond q_diff(R_diff);
+    q_diff.normalize();
+    SO3 R_diff_so3(q_diff);
+    
+    const Vec3d er = R_diff_so3.log();
+    // =============================
+
     const Vec3d ep = vp->estimate().translation() - state_.p_;
     const Vec3d ev = vv->estimate() - state_.v_;
     const Vec3d ebg = vg->estimate() - state_.bg_;
@@ -29,7 +40,14 @@ void EdgePriorPoseNavState::computeError() {
 
 void EdgePriorPoseNavState::linearizeOplus() {
     const auto* vp = dynamic_cast<const VertexPose*>(_vertices[0]);
-    const Vec3d er = SO3(state_.R_.matrix().transpose() * vp->estimate().so3().matrix()).log();
+    
+    // ===== 安全计算旋转误差 =====
+    Eigen::Matrix3d R_diff = state_.R_.matrix().transpose() * vp->estimate().so3().matrix();
+    Eigen::Quaterniond q_diff(R_diff);
+    q_diff.normalize();
+    SO3 R_diff_so3(q_diff);
+    const Vec3d er = R_diff_so3.log();
+    // =============================
 
     /// 注意有3个index, 顶点的，自己误差的，顶点内部变量的
     _jacobianOplus[0].setZero();

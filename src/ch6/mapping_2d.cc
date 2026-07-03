@@ -10,7 +10,7 @@
 #include <glog/logging.h>
 #include <execution>
 #include <opencv2/opencv.hpp>
-
+#include "common/path_utils.h"  
 namespace sad {
 
 bool Mapping2D::Init(bool with_loop_closing) {
@@ -119,16 +119,22 @@ void Mapping2D::ExpandSubmap() {
     // 当前submap作为历史地图放入loop closing
     if (loop_closing_) {
         loop_closing_->AddFinishedSubmap(current_submap_);
-    }
+    } 
 
     // 将当前submap替换成新的
     auto last_submap = current_submap_;
 
-    // debug
-    cv::imwrite("./data/ch6/submap_" + std::to_string(last_submap->GetId()) + ".png",
-                last_submap->GetOccuMap().GetOccupancyGridBlackWhite());
+    // debug - 保存到可执行文件所在目录
+    std::string exe_dir = sad::GetExecutableDir();
+    if (!exe_dir.empty()) {
+        std::string save_path = exe_dir + "/data/ch6/submap_" + std::to_string(last_submap->GetId()) + ".png";
+        cv::imwrite(save_path, last_submap->GetOccuMap().GetOccupancyGridBlackWhite());
+    } else {
+        LOG(WARNING) << "Cannot get executable directory, skip saving submap image";
+    }
 
-    current_submap_ = std::make_shared<Submap>(current_frame_->pose_);
+
+    current_submap_ = std::make_shared<Submap>(current_frame_->pose_); // tj : 这里以当前帧的pose作为子地图的pose, 也就是子地图的中心点
     current_frame_->pose_submap_ = SE2();  // 这个归零
 
     current_submap_->SetId(++submap_id_);

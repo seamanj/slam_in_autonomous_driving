@@ -9,6 +9,8 @@
 #include "common/imu.h"
 #include "common/point_types.h"
 
+#include <livox_ros_driver/msg/custom_msg.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <glog/logging.h>
 #include <deque>
 
@@ -52,8 +54,8 @@ class MessageSync {
      * 处理sensor_msgs::PointCloud2点云
      * @param msg
      */
-    void ProcessCloud(const sensor_msgs::PointCloud2::ConstPtr &msg) {
-        if (msg->header.stamp.toSec() < last_timestamp_lidar_) {
+    void ProcessCloud(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
+        if (msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 < last_timestamp_lidar_) {
             LOG(ERROR) << "lidar loop back, clear buffer";
             lidar_buffer_.clear();
         }
@@ -61,20 +63,20 @@ class MessageSync {
         FullCloudPtr cloud(new FullPointCloudType());
         conv_->Process(msg, cloud);
         lidar_buffer_.push_back(cloud);
-        time_buffer_.push_back(msg->header.stamp.toSec());
-        last_timestamp_lidar_ = msg->header.stamp.toSec();
+        time_buffer_.push_back(msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9);
+        last_timestamp_lidar_ = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
 
         Sync();
     }
 
     /// 处理Livox点云
-    void ProcessCloud(const livox_ros_driver::CustomMsg::ConstPtr &msg) {
-        if (msg->header.stamp.toSec() < last_timestamp_lidar_) {
+    void ProcessCloud(const livox_ros_driver::msg::CustomMsg::SharedPtr msg) {
+        if (msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 < last_timestamp_lidar_) {
             LOG(WARNING) << "lidar loop back, clear buffer";
             lidar_buffer_.clear();
         }
 
-        last_timestamp_lidar_ = msg->header.stamp.toSec();
+        last_timestamp_lidar_ = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
         FullCloudPtr ptr(new FullPointCloudType());
         conv_->Process(msg, ptr);
 

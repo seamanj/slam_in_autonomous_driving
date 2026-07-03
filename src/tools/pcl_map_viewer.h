@@ -31,6 +31,19 @@ class PCLMapViewer {
         }
         voxel_filter_.setLeafSize(leaf_size, leaf_size, leaf_size);
     }
+    ~PCLMapViewer() {
+        close();
+    }
+    
+    void close() {
+        LOG(INFO) << "PCLMapViewer::close() called";
+        if (viewer_) {
+            LOG(INFO) << "Calling PCLVisualizer::close()";
+            viewer_->close();
+            viewer_ = nullptr;
+            LOG(INFO) << "PCLVisualizer closed";
+        }
+    }
 
     /**
      * 增加一个Pose和它的点云（世界系）
@@ -38,6 +51,10 @@ class PCLMapViewer {
      * @param cloud_world
      */
     void SetPoseAndCloud(const SE3& pose, CloudPtr cloud_world) {
+        if (!cloud_world || cloud_world->empty()) {
+        LOG(WARNING) << "cloud_world is null or empty, skipping visualization";
+        return;
+        }
         voxel_filter_.setInputCloud(cloud_world);
         voxel_filter_.filter(*tmp_cloud_);
 
@@ -55,7 +72,17 @@ class PCLMapViewer {
             Eigen::Affine3f T;
             T.matrix() = pose.matrix().cast<float>();
             viewer_->addCoordinateSystem(5, T, "vehicle");
-            viewer_->spinOnce(1);
+
+            // ✅ 第一次不调用 spinOnce，或者使用极短时间
+            if (first_spin_) {
+                // 只初始化渲染，不处理事件
+                viewer_->spinOnce(0);  // 0 表示不处理事件
+                first_spin_ = false;
+            } else {
+                viewer_->spinOnce(1);
+            }
+
+            // viewer_->spinOnce(1);
         }
 
         if (local_map_->size() > 600000) {
@@ -92,6 +119,7 @@ class PCLMapViewer {
     float leaf_size_ = 1.0;
     CloudPtr tmp_cloud_;  //
     CloudPtr local_map_;
+    bool first_spin_ = true;
 };
 }  // namespace sad
 
