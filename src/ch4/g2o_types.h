@@ -43,7 +43,7 @@ class EdgeInertial : public g2o::BaseMultiEdge<9, Vec9d> {
 
     Eigen::Matrix<double, 24, 24> GetHessian() {
         linearizeOplus();
-        Eigen::Matrix<double, 9, 24> J;  // tj : 6 3 3 3 6 3
+        Eigen::Matrix<double, 9, 24> J;
         J.block<9, 6>(0, 0) = _jacobianOplus[0];
         J.block<9, 3>(0, 6) = _jacobianOplus[1];
         J.block<9, 3>(0, 9) = _jacobianOplus[2];

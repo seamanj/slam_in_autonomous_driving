@@ -207,8 +207,11 @@ class EdgeGNSS : public g2o::BaseUnaryEdge<6, SE3, VertexPose> {
         VertexPose* v = (VertexPose*)_vertices[0];
         // jacobian 6x6
         _jacobianOplusXi.setZero();
-        _jacobianOplusXi.block<3, 3>(0, 0) = (_measurement.so3().inverse() * v->estimate().so3()).jr_inv();  // dR/dR
-        _jacobianOplusXi.block<3, 3>(3, 3) = Mat3d::Identity();                                              // dp/dp
+        // 右雅可比的逆 = 左雅可比逆的转置
+        _jacobianOplusXi.block<3, 3>(0, 0) = SO3::leftJacobianInverse(
+            (_measurement.so3().inverse() * v->estimate().so3()).log()
+        ).transpose();  // dR/dR
+        _jacobianOplusXi.block<3, 3>(3, 3) = Mat3d::Identity();  // dp/dp
     }
 
     Mat6d GetHessian() {

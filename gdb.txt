@@ -1,0 +1,38 @@
+# 在崩溃前设置断点
+(gdb) break gins_pre_integ.cc:51
+(gdb) run
+
+# 当断点触发时，检查 pre_integ_ 的状态
+(gdb) print pre_integ_
+(gdb) print pre_integ_.get()
+(gdb) print pre_integ_.use_count()
+
+# 继续执行
+(gdb) continue
+
+
+
+(gdb) bt full
+# 一直按回车，直到显示完整的调用栈
+# 如果太长，可以这样保存到文件：
+(gdb) set logging file /tmp/gdb_output.txt
+(gdb) set logging on
+(gdb) bt full
+(gdb) set logging off
+
+
+
+cd /home/seamanj/Workspace/cpp_projects/slam_in_autonomous_driving
+
+cmake -B build/build_main -S . \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_PREFIX_PATH="${PWD}/build/install;/opt/ros/humble;/usr/local" \
+    -DCMAKE_CXX_FLAGS="-UHAVE_CUDA -std=c++17 -fsanitize=address -fno-omit-frame-pointer -g" \
+    -DCMAKE_C_FLAGS="-UHAVE_CUDA -fsanitize=address -fno-omit-frame-pointer -g"
+
+cmake --build build/build_main -j32
+
+./build/build_main/bin/ch4/ex1_run_gins_pre_integ
+
+
+grep -E "EIGEN_(MAJOR|MINOR|PATCH)_VERSION" /usr/local/include/eigen3/Eigen/src/Core/util/Macros.h

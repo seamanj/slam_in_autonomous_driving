@@ -59,7 +59,8 @@ int main(int argc, char** argv) {
 
     sad::GinsPreInteg::Options gins_options;
     gins_options.verbose_ = FLAGS_debug;
-    sad::GinsPreInteg gins(gins_options);
+    // sad::GinsPreInteg gins(gins_options);
+    std::shared_ptr<sad::GinsPreInteg> gins(new sad::GinsPreInteg(gins_options));
 
     bool first_gnss_set = false;
     Vec3d origin = Vec3d::Zero();
@@ -83,11 +84,11 @@ int main(int argc, char** argv) {
           if (!imu_inited) {
               // tj : 这里会浪费一条IMU记录, 
               // 读取初始零偏，设置GINS
-              sad::GinsPreInteg::Options options;
+              alignas(64) sad::GinsPreInteg::Options options;
               options.preinteg_options_.init_bg_ = imu_init.GetInitBg();
               options.preinteg_options_.init_ba_ = imu_init.GetInitBa();
               options.gravity_ = imu_init.GetGravity();
-              gins.SetOptions(options);
+              gins->SetOptions(options);
               imu_inited = true;
               // tj : 这里会创建pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options_); 重置参照时间, 
               //但是没有设置current_time_，所以current_time_还是之前设置的时间
@@ -100,9 +101,9 @@ int main(int argc, char** argv) {
           }
 
           /// GNSS 也接收到之后，再开始进行预测
-          gins.AddImu(imu);  // tj  : 将以最近一个GNSS重置的时间为参照, 进行积分和预测
+          gins->AddImu(imu);  // tj  : 将以最近一个GNSS重置的时间为参照, 进行积分和预测
 
-          auto state = gins.GetState();
+          auto state = gins->GetState();
           save_result(fout, state);
           if (ui) {
               ui->UpdateNavState(state);
@@ -127,9 +128,9 @@ int main(int argc, char** argv) {
             }
             gnss_convert.utm_pose_.translation() -= origin;
 
-            gins.AddGnss(gnss_convert);// tj : 这里会重置积分和当前时间 
+            gins->AddGnss(gnss_convert);// tj : 这里会重置积分和当前时间 
 
-            auto state = gins.GetState();
+            auto state = gins->GetState();
             save_result(fout, state);
             if (ui) {
                 ui->UpdateNavState(state);
@@ -141,7 +142,7 @@ int main(int argc, char** argv) {
             imu_init.AddOdom(odom);
 
             if (imu_inited && gnss_inited) {
-                gins.AddOdom(odom);
+                gins->AddOdom(odom);
             }
         })
         .Go();

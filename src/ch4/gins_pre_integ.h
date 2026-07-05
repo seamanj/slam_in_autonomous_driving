@@ -28,8 +28,10 @@ namespace sad {
  */
 class GinsPreInteg {
    public:
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /// GINS 配置项
     struct Options {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         Options() {}
 
         Vec3d gravity_ = Vec3d(0, 0, -9.8);  // 重力方向

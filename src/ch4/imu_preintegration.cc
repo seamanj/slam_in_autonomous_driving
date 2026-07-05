@@ -3,9 +3,12 @@
 
 namespace sad {
 
-IMUPreintegration::IMUPreintegration(Options options) {
-    bg_ = options.init_bg_;
-    ba_ = options.init_ba_;
+IMUPreintegration::IMUPreintegration(Options options) 
+    : bg_(options.init_bg_),
+      ba_(options.init_ba_),
+      dR_(),  // 默认构造 SO3
+      noise_gyro_acce_(Mat6d::Zero())
+{
     const float ng2 = options.noise_gyro_ * options.noise_gyro_;
     const float na2 = options.noise_acce_ * options.noise_acce_;
     noise_gyro_acce_.diagonal() << ng2, ng2, ng2, na2, na2, na2;
@@ -48,7 +51,7 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
 
     // 旋转部分
     Vec3d omega = gyr * dt;         // 转动量
-    Mat3d rightJ = SO3::jr(omega);  // 右雅可比
+    Mat3d rightJ = SO3::leftJacobian(omega).transpose();
     SO3 deltaR = SO3::exp(omega);   // exp后
     dR_ = dR_ * deltaR;             // (4.9)
 
@@ -63,11 +66,8 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
 
     // 增量积分时间
     dt_ += dt;
-    // tj : 变量后面加下划线_, 参数系是第一帧
 }
 
-
-// tj : 公式4.32
 SO3 IMUPreintegration::GetDeltaRotation(const Vec3d &bg) { return dR_ * SO3::exp(dR_dbg_ * (bg - bg_)); }
 
 Vec3d IMUPreintegration::GetDeltaVelocity(const Vec3d &bg, const Vec3d &ba) {
@@ -82,7 +82,7 @@ NavStated IMUPreintegration::Predict(const sad::NavStated &start, const Vec3d &g
     SO3 Rj = start.R_ * dR_;
     Vec3d vj = start.R_ * dv_ + start.v_ + grav * dt_;
     Vec3d pj = start.R_ * dp_ + start.p_ + start.v_ * dt_ + 0.5f * grav * dt_ * dt_;
-    // tj : 公式4.7
+
     auto state = NavStated(start.timestamp_ + dt_, Rj, pj, vj);
     state.bg_ = bg_;
     state.ba_ = ba_;

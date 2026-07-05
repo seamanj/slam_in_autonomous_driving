@@ -299,9 +299,6 @@ void PangolinWindowImpl::Render() {
 }
 
 void PangolinWindowImpl::AllocateBuffer() {
-    // std::string global_text(
-    //     "Welcome to SAD.UI. Open source code: https://github.com/gaoxiang12/slam_in_autonomous_driving. All right "
-    //     "reserved.");
     std::string global_text(
         "Welcome to SAD.UI.");
     auto &font = pangolin::default_font();

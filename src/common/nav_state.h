@@ -18,7 +18,6 @@ namespace sad {
  */
 template <typename T>
 struct NavState {
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using Vec3 = Eigen::Matrix<T, 3, 1>;
     using SO3 = Sophus::SO3<T>;
 
