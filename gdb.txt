@@ -36,3 +36,30 @@ cmake --build build/build_main -j32
 
 
 grep -E "EIGEN_(MAJOR|MINOR|PATCH)_VERSION" /usr/local/include/eigen3/Eigen/src/Core/util/Macros.h
+
+
+sudo apt install ros-humble-pcl-conversions
+sudo apt install ros-humble-pcl-ros
+sudo apt install ros-humble-perception-pcl
+# 安装 ament_lint_auto
+sudo apt install ros-humble-ament-lint-auto
+
+# 如果还有其他缺失的 ament 包，一并安装
+sudo apt install ros-humble-ament-cmake-ros
+sudo apt install ros-humble-ament-lint-common
+sudo apt install ros-humble-ament-cmake-pytest
+
+sudo apt remove ros-humble-pcl-conversions
+sudo apt remove ros-humble-pcl-ros
+sudo apt remove ros-humble-perception-pcl
+
+g++ test_pcl.cc -o test_pcl -std=c++17 -I/usr/local/include/pcl-1.13 -I/usr/local/include/eigen3 -L/usr/local/lib -lpcl_io -lpcl_common -Wl,-rpath,/usr/local/lib
+
+
+# 查看 PCL 1.13 库中的符号，看是否使用了对齐版本
+nm -D /usr/local/lib/libpcl_io.so.1.13 | grep Quaternion | head -10
+输出会显示类似：
+
+QuaternionIfLi0EE = 非对齐 (Q=0)
+
+QuaternionIfLi1EE = 对齐 (Q=1)
