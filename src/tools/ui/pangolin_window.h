@@ -34,6 +34,9 @@ class PangolinWindow {
     /// 更新kalman滤波器状态
     void UpdateNavState(const NavStated& state);
 
+    /// 更新位姿（仅SE3）
+    void UpdatePose(const SE3& pose);
+
     /// 更新一次scan和它对应的Pose
     void UpdateScan(CloudPtr cloud, const SE3& pose);
 

@@ -4,10 +4,10 @@
 
 #include "ch7/direct_ndt_lo.h"
 #include "common/math_utils.h"
-#include "tools/pcl_map_viewer.h"
+// #include "tools/pcl_map_viewer.h"
 
 #include <pcl/common/transforms.h>
-
+#include <pcl/io/pcd_io.h>
 namespace sad {
 
 void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
@@ -24,12 +24,7 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
         } else {
             ndt_.SetTarget(local_map_);
         }
-        // ✅ 添加：第一帧也显示
-        if (viewer_ != nullptr) {
-            CloudPtr scan_world(new PointCloudType);
-            pcl::transformPointCloud(*scan, *scan_world, pose.matrix().cast<float>());
-            viewer_->SetPoseAndCloud(pose, scan_world);
-        }
+
         return;
     }
 
@@ -60,7 +55,9 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
     }
 
     if (viewer_ != nullptr) {
-        viewer_->SetPoseAndCloud(pose, scan_world);
+        // viewer_->SetPoseAndCloud(pose, scan_world);
+        viewer_->UpdateScan(scan_world, pose);
+        viewer_->UpdatePose(pose);
     }
 }
 
@@ -115,8 +112,12 @@ SE3 DirectNDTLO::AlignWithLocalMap(CloudPtr scan) {
 }
 
 void DirectNDTLO::SaveMap(const std::string& map_path) {
-    if (viewer_) {
-        viewer_->SaveMap(map_path);
+    // if (viewer_) {
+    //     viewer_->SaveMap(map_path);
+    // }
+
+    if (local_map_) {
+        pcl::io::savePCDFileBinary(map_path, *local_map_);
     }
 }
 

@@ -11,7 +11,8 @@
 #include "ch7/ndt_3d.h"
 #include "common/eigen_types.h"
 #include "common/point_types.h"
-#include "tools/pcl_map_viewer.h"
+// #include "tools/pcl_map_viewer.h"
+#include "tools/ui/pangolin_window.h"
 
 namespace sad {
 
@@ -34,7 +35,8 @@ class DirectNDTLO {
 
     DirectNDTLO(Options options = Options()) : options_(options) {
         if (options_.display_realtime_cloud_) {
-            viewer_ = std::make_shared<PCLMapViewer>(0.5);
+            viewer_ = std::make_shared<ui::PangolinWindow>();
+            viewer_->Init();
         }
 
         ndt_ = Ndt3d(options_.ndt3d_options_);
@@ -53,17 +55,7 @@ class DirectNDTLO {
 
     /// 存储地图(viewer里）
     void SaveMap(const std::string& map_path);
-    void CloseViewer() {
-        LOG(INFO) << "Closing viewer...";
-        if (viewer_) {
-            LOG(INFO) << "Viewer exists, calling close()";
-            viewer_->close();
-            viewer_ = nullptr;
-            LOG(INFO) << "Viewer closed successfully";
-        } else {
-            LOG(INFO) << "Viewer is already null";
-        }
-    }
+
    private:
     /// 与local map进行配准
     SE3 AlignWithLocalMap(CloudPtr scan);
@@ -81,7 +73,7 @@ class DirectNDTLO {
     pcl::NormalDistributionsTransform<PointType, PointType> ndt_pcl_;
     Ndt3d ndt_;
 
-    std::shared_ptr<PCLMapViewer> viewer_ = nullptr;
+    std::shared_ptr<ui::PangolinWindow> viewer_ = nullptr;
 };
 
 }  // namespace sad

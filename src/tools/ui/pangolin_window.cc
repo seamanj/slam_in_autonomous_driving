@@ -50,7 +50,13 @@ void PangolinWindow::UpdateNavState(const NavStated& state) {
 
     impl_->kf_result_need_update_.store(true);
 }
+void PangolinWindow::UpdatePose(const SE3& pose) {
+    std::unique_lock<std::mutex> lock(impl_->mtx_nav_state_);
 
+    impl_->pose_ = pose;
+
+    impl_->kf_result_need_update_.store(true);
+}
 void PangolinWindow::UpdateScan(CloudPtr cloud, const SE3& pose) {
     std::lock_guard<std::mutex> lock(impl_->mtx_current_scan_);
     *impl_->current_scan_ = *cloud;  // need deep copy

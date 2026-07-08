@@ -5,8 +5,6 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
-#include <sensor_msgs/msg/point_cloud2.hpp>
-
 #include "ch7/direct_ndt_lo.h"
 #include "ch7/ndt_3d.h"
 #include "common/dataset_type.h"
@@ -38,11 +36,15 @@ int main(int argc, char** argv) {
     sad::DirectNDTLO ndt_lo(options);
 
     rosbag_io
-        .AddAutoPointCloudHandle([&ndt_lo](const sensor_msgs::msg::PointCloud2::SharedPtr msg) -> bool {
+        .AddAutoPointCloudHandle(
+        [&ndt_lo](sensor_msgs::msg::PointCloud2::SharedPtr msg) -> bool {
             sad::common::Timer::Evaluate(
                 [&]() {
                     SE3 pose;
-                    ndt_lo.AddCloud(sad::VoxelCloud(sad::PointCloud2ToCloudPtr(msg)), pose);
+                    ndt_lo.AddCloud(
+                        sad::VoxelCloud(
+                            sad::PointCloud2ToCloudPtr(msg)),
+                        pose);
                 },
                 "NDT registration");
             return true;
@@ -52,13 +54,18 @@ int main(int argc, char** argv) {
     if (FLAGS_display_map) {
         // 把地图存下来
         ndt_lo.SaveMap("./data/ch7/map.pcd");
-        ndt_lo.CloseViewer();  // 显式关闭查看器
     }
 
     sad::common::Timer::PrintAll();
     LOG(INFO) << "done.";
 
-
-
     return 0;
 }
+
+
+
+/*
+纯 VTK	✅ 正常
+PCLVisualizer(create_interactor=true)	❌ 崩溃
+PCLVisualizer(create_interactor=false)	✅ 不崩，但 stopped=true
+ */

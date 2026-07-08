@@ -50,12 +50,12 @@ find_package(rosbag2_storage REQUIRED)
 
 # ========== velodyne_msgs ==========
 # 查找 velodyne_msgs（如果还没构建）
-find_package(velodyne_msgs REQUIRED)
+# find_package(velodyne_msgs REQUIRED)
 #find_package(velodyne_driver REQUIRED)    # 可选
 
 # ========== livox_ros_driver ==========
 # 查找 livox_ros_driver（如果还没构建）
-find_package(livox_ros_driver REQUIRED)
+# find_package(livox_ros_driver REQUIRED)
 
 # ========== 添加包含目录 ==========
 include_directories(${angles_INCLUDE_DIRS})
@@ -109,7 +109,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/velodyne_msgs/ros
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/thirdparty/livox_ros_driver/rosidl_generator_cpp)
 
 # ========== 添加 install/include 全局路径 ==========
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/install/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/install/include)
 
 # ========== TBB 配置 ==========
 if(BUILD_WITH_UBUNTU1804)
@@ -153,8 +153,8 @@ if(BUILD_WITH_UBUNTU1804)
             ${sensor_msgs_LIBRARIES}
             ${std_msgs_LIBRARIES}
             ${geometry_msgs_LIBRARIES}
-            ${velodyne_msgs_LIBRARIES}
-            ${livox_ros_driver_LIBRARIES}
+            # ${velodyne_msgs_LIBRARIES}
+            # ${livox_ros_driver_LIBRARIES}
             ${g2o_libs}
             ${OpenCV_LIBS}
             ${PCL_LIBRARIES}
@@ -180,8 +180,8 @@ else()
             ${sensor_msgs_LIBRARIES}
             ${std_msgs_LIBRARIES}
             ${geometry_msgs_LIBRARIES}
-            ${velodyne_msgs_LIBRARIES}
-            ${livox_ros_driver_LIBRARIES}
+            # ${velodyne_msgs_LIBRARIES}
+            # ${livox_ros_driver_LIBRARIES}
             # g2o（使用现代写法）
             g2o::core
             g2o::stuff
