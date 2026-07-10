@@ -7,7 +7,6 @@ add_executable(ex2_test_2d_icp_s2s
 target_link_libraries(ex2_test_2d_icp_s2s
         ${PROJECT_NAME}.ch6
         ${OpenCV_LIBS}
-        ${catkin_LIBRARIES}
         glog gflags
         ${PCL_LIBRARIES}
         )

@@ -63,3 +63,6 @@ nm -D /usr/local/lib/libpcl_io.so.1.13 | grep Quaternion | head -10
 QuaternionIfLi0EE = 非对齐 (Q=0)
 
 QuaternionIfLi1EE = 对齐 (Q=1)
+
+
+cmake --build build/build_main -j32

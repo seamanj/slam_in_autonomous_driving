@@ -8,8 +8,10 @@
 #include "ch7/direct_ndt_lo.h"
 #include "ch7/ndt_3d.h"
 #include "common/dataset_type.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include "common/timer/timer.h"
+
+#include "common/pointcloud_ros.h"
 
 /// 本程序以ULHK数据集为例
 /// 测试以NDT为主的Lidar Odometry
@@ -36,20 +38,22 @@ int main(int argc, char** argv) {
     sad::DirectNDTLO ndt_lo(options);
 
     rosbag_io
-        .AddAutoPointCloudHandle(
-        [&ndt_lo](sensor_msgs::msg::PointCloud2::SharedPtr msg) -> bool {
-            sad::common::Timer::Evaluate(
-                [&]() {
-                    SE3 pose;
-                    ndt_lo.AddCloud(
-                        sad::VoxelCloud(
-                            sad::PointCloud2ToCloudPtr(msg)),
-                        pose);
-                },
-                "NDT registration");
-            return true;
-        })
-        .Go();
+    .AddAutoPointCloudHandle(
+    [&ndt_lo](sensor_msgs::msg::PointCloud2::SharedPtr msg) -> bool {
+
+        auto cloud = sad::PointCloud2ToCloudPtr(msg);
+        sad::common::Timer::Evaluate(
+            [&]() {
+                SE3 pose;
+                ndt_lo.AddCloud(
+                    sad::VoxelCloud(cloud),
+                    pose);
+            },
+            "NDT registration");
+
+        return true;
+    })
+    .Go();
 
     if (FLAGS_display_map) {
         // 把地图存下来

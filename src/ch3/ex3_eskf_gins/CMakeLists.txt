@@ -5,5 +5,5 @@ set_target_properties(ex3_run_eskf_gins PROPERTIES
 )
 
 target_link_libraries(ex3_run_eskf_gins
-        glog gflags ${PROJECT_NAME}.common ${PROJECT_NAME}.ch3
+        glog gflags ${PROJECT_NAME}.common ${PROJECT_NAME}.io ${PROJECT_NAME}.ch3
         )

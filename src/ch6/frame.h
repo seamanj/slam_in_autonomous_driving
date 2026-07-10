@@ -6,7 +6,7 @@
 #define SLAM_IN_AUTO_DRIVING_FRAME_H
 
 #include "common/eigen_types.h"
-#include "common/lidar_utils.h"
+#include "common/lidar_types_ros.h"
 
 namespace sad {
 

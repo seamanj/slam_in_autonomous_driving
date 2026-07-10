@@ -10,6 +10,7 @@ set_target_properties(motion PROPERTIES
 target_link_libraries(motion
     ${PROJECT_NAME}.common
     ${PROJECT_NAME}.tools
+    ${slam_core_libs}
 )
 
 
@@ -24,4 +25,5 @@ set_target_properties(ex3_motion PROPERTIES
 target_link_libraries(ex3_motion
     ${PROJECT_NAME}.common
     ${PROJECT_NAME}.tools
+    ${slam_core_libs}
 )

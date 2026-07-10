@@ -6,7 +6,7 @@
 #include <opencv2/highgui.hpp>
 
 #include "ch6/lidar_2d_utils.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 
 DEFINE_string(bag_path, "./dataset/sad/2dmapping/test_2d_lidar.bag", "数据包路径");
 // tj : ros1 to ros2 convert: rosbags-convert --src /home/seamanj/Software/dataset/sad/2dmapping/floor1.bag --dst /home/seamanj/Software/dataset/sad/2dmapping/floor1_ros2

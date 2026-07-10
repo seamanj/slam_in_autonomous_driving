@@ -8,7 +8,7 @@
 #include <opencv2/core.hpp>
 
 #include "common/eigen_types.h"
-#include "common/lidar_utils.h"
+#include "common/lidar_types_ros.h"
 
 namespace sad {
 

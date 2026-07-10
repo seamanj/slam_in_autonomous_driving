@@ -6,7 +6,7 @@
 #define SLAM_IN_AUTO_DRIVING_ICP_2D_H
 
 #include "common/eigen_types.h"
-#include "common/lidar_utils.h"
+#include "common/lidar_utils_ros.h"
 
 #include <pcl/search/kdtree.h>
 

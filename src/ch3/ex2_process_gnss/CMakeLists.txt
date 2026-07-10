@@ -19,5 +19,5 @@ add_library(${PROJECT_NAME}.ch3
         )
 
 target_link_libraries(${PROJECT_NAME}.ch3
-        glog gflags ${PROJECT_NAME}.common
+        glog gflags ${PROJECT_NAME}.common ${PROJECT_NAME}.io
         )

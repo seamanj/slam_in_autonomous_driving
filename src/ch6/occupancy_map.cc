@@ -8,7 +8,7 @@
 
 #include <glog/logging.h>
 #include <execution>
-
+#include <set>
 namespace sad {
 
 OccupancyMap::OccupancyMap() {

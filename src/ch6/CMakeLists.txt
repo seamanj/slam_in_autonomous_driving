@@ -13,6 +13,7 @@ add_library(${PROJECT_NAME}.ch6
 target_link_libraries(${PROJECT_NAME}.ch6
         ${PCL_LIBRARIES}
         ${PROJECT_NAME}.common
+        ${PROJECT_NAME}.ros2
         )
 
 

@@ -7,8 +7,6 @@ add_executable(ex2_test_ndt_lo
 target_link_libraries(ex2_test_ndt_lo
         ${PROJECT_NAME}.ch5
         ${PROJECT_NAME}.ch7
-        ${PROJECT_NAME}.common
-        ${third_party_libs}
         )
 
 

@@ -7,7 +7,7 @@
 
 #include "ch6/icp_2d.h"
 #include "ch6/lidar_2d_utils.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 
 DEFINE_string(bag_path, "./dataset/sad/2dmapping/floor1.bag", "数据包路径");
 DEFINE_string(method, "point2point", "2d icp方法：point2point/point2plane");

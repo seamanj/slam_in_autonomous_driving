@@ -7,7 +7,7 @@
 
 #include "ch6/frame.h"
 #include "common/eigen_types.h"
-#include "common/lidar_utils.h"
+#include "common/lidar_utils_ros.h"
 
 #include <memory>
 #include <opencv2/core.hpp>

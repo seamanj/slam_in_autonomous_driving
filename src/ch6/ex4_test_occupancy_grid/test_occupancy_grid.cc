@@ -7,7 +7,7 @@
 
 #include "ch6/lidar_2d_utils.h"
 #include "ch6/occupancy_map.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include "common/sys_utils.h"
 
 DEFINE_string(bag_path, "./dataset/sad/2dmapping/floor1.bag", "数据包路径");

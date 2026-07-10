@@ -11,6 +11,8 @@
 #include "common/io_utils.h"
 #include "common/timer/timer.h"
 
+#include "common/lidar_utils_ros.h"
+
 DEFINE_string(bag_path, "./dataset/sad/ulhk/test2.bag", "path to rosbag");
 DEFINE_string(dataset_type, "ULHK", "NCLT/ULHK/KITTI/WXB3D");  // 数据集类型
 DEFINE_bool(use_ndt_nearby_6, false, "use ndt nearby 6?");

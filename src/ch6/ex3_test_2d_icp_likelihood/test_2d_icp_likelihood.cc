@@ -7,7 +7,7 @@
 
 #include "ch6/lidar_2d_utils.h"
 #include "ch6/likelihood_filed.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 
 DEFINE_string(bag_path, "./dataset/sad/2dmapping/floor1.bag", "数据包路径");
 DEFINE_string(method, "gauss-newton", "gauss-newton/g2o");

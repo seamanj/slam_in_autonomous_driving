@@ -6,7 +6,7 @@
 #define SLAM_IN_AUTO_DRIVING_LIDAR_2D_UTILS_H
 
 #include "common/eigen_types.h"
-#include "common/lidar_utils.h"
+#include "common/lidar_types_ros.h"
 
 #include <opencv2/core/core.hpp>
 

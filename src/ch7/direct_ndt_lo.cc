@@ -24,7 +24,6 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
         } else {
             ndt_.SetTarget(local_map_);
         }
-
         return;
     }
 
@@ -34,19 +33,19 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
     pcl::transformPointCloud(*scan, *scan_world, pose.matrix().cast<float>());
 
     if (IsKeyframe(pose)) {
+        
         last_kf_pose_ = pose;
 
         // 重建local map
         scans_in_local_map_.emplace_back(scan_world);
-        if (scans_in_local_map_.size() > options_.num_kfs_in_local_map_) {
-            scans_in_local_map_.pop_front();
-        }
 
         local_map_.reset(new PointCloudType);
         for (auto& scan : scans_in_local_map_) {
             *local_map_ += *scan;
         }
-
+        LOG(INFO)
+        << "local map points = "
+        << local_map_->size();
         if (options_.use_pcl_ndt_) {
             ndt_pcl_.setInputTarget(local_map_);
         } else {
@@ -55,10 +54,12 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
     }
 
     if (viewer_ != nullptr) {
-        // viewer_->SetPoseAndCloud(pose, scan_world);
-        viewer_->UpdateScan(scan_world, pose);
-        viewer_->UpdatePose(pose);
+        viewer_->SetPoseAndCloud(pose, scan_world);
     }
+
+
+    
+
 }
 
 bool DirectNDTLO::IsKeyframe(const SE3& current_pose) {
@@ -69,6 +70,7 @@ bool DirectNDTLO::IsKeyframe(const SE3& current_pose) {
 }
 
 SE3 DirectNDTLO::AlignWithLocalMap(CloudPtr scan) {
+
     if (options_.use_pcl_ndt_) {
         ndt_pcl_.setInputSource(scan);
     } else {
@@ -79,6 +81,7 @@ SE3 DirectNDTLO::AlignWithLocalMap(CloudPtr scan) {
 
     SE3 guess;
     bool align_success = true;
+
     if (estimated_poses_.size() < 2) {
         if (options_.use_pcl_ndt_) {
             ndt_pcl_.align(*output, guess.matrix().cast<float>());
@@ -87,9 +90,12 @@ SE3 DirectNDTLO::AlignWithLocalMap(CloudPtr scan) {
             align_success = ndt_.AlignNdt(guess);
         }
     } else {
-        // 从最近两个pose来推断
+
+        // 最近两帧
         SE3 T1 = estimated_poses_[estimated_poses_.size() - 1];
         SE3 T2 = estimated_poses_[estimated_poses_.size() - 2];
+
+        // 恒速预测
         guess = T1 * (T2.inverse() * T1);
 
         if (options_.use_pcl_ndt_) {
@@ -101,23 +107,20 @@ SE3 DirectNDTLO::AlignWithLocalMap(CloudPtr scan) {
     }
 
     LOG(INFO) << "pose: " << guess.translation().transpose() << ", "
-              << guess.so3().unit_quaternion().coeffs().transpose();
+            << guess.so3().unit_quaternion().coeffs().transpose();
 
     if (options_.use_pcl_ndt_) {
         LOG(INFO) << "trans prob: " << ndt_pcl_.getTransformationProbability();
     }
 
     estimated_poses_.emplace_back(guess);
+
     return guess;
 }
 
 void DirectNDTLO::SaveMap(const std::string& map_path) {
-    // if (viewer_) {
-    //     viewer_->SaveMap(map_path);
-    // }
-
-    if (local_map_) {
-        pcl::io::savePCDFileBinary(map_path, *local_map_);
+    if (viewer_) {
+        viewer_->SaveMap(map_path);
     }
 }
 

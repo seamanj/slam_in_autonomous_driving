@@ -7,7 +7,7 @@
 
 #include "ch6/lidar_2d_utils.h"
 #include "ch6/mapping_2d.h"
-#include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include "common/path_utils.h"
 DEFINE_string(bag_path, "./dataset/sad/2dmapping/floor1.bag", "数据包路径");
 DEFINE_bool(with_loop_closing, false, "是否使用回环检测");

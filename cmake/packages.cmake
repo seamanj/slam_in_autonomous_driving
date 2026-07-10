@@ -25,7 +25,7 @@ add_definitions(-DGLOG_NO_ABBREVIATED_SEVERITIES)
 
 find_package(g2o REQUIRED)
 find_package(Ceres REQUIRED)
-
+find_package(GTest REQUIRED)
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     message(STATUS "OpenMP found, enabling parallelization")
@@ -43,7 +43,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(geometry_msgs REQUIRED)      # 添加
-
+find_package(rcl_interfaces REQUIRED)
 # ========== rosbag2 ==========
 find_package(rosbag2_cpp REQUIRED)
 find_package(rosbag2_storage REQUIRED)
@@ -73,6 +73,7 @@ endif()
 include_directories(${g2o_INCLUDE_DIRS})
 message(STATUS "g2o_INCLUDE_DIRS: ${g2o_INCLUDE_DIRS}")
 include_directories(${rclcpp_INCLUDE_DIRS})
+include_directories(${rcl_interfaces_INCLUDE_DIRS})
 include_directories(${sensor_msgs_INCLUDE_DIRS})
 include_directories(${std_msgs_INCLUDE_DIRS})
 include_directories(${geometry_msgs_INCLUDE_DIRS})    # 添加
@@ -92,111 +93,75 @@ include_directories(${PROJECT_SOURCE_DIR}/thirdparty/velodyne/include)
 
 # ========== 一起构建消息包 ==========
 # 先构建 monitor_msgs
-add_subdirectory(src/common/msg/monitor_msgs)
+# add_subdirectory(src/common/msg/monitor_msgs)
 
 # 手动设置 monitor_msgs_DIR，让 velodyne_msgs 能找到
 set(monitor_msgs_DIR ${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/monitor_msgs)
 
 # 然后构建 velodyne_msgs
-add_subdirectory(src/common/msg/velodyne_msgs)
+# add_subdirectory(src/common/msg/velodyne_msgs)
 
 # livox_ros_driver
-add_subdirectory(thirdparty/livox_ros_driver)
+# add_subdirectory(thirdparty/livox_ros_driver)
 
 # 添加生成的头文件路径
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/monitor_msgs/rosidl_generator_cpp)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/velodyne_msgs/rosidl_generator_cpp)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/thirdparty/livox_ros_driver/rosidl_generator_cpp)
+# include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/monitor_msgs/rosidl_generator_cpp)
+# include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/common/msg/velodyne_msgs/rosidl_generator_cpp)
+# include_directories(${CMAKE_CURRENT_BINARY_DIR}/thirdparty/livox_ros_driver/rosidl_generator_cpp)
 
 # ========== 添加 install/include 全局路径 ==========
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/install/include)
 
-# ========== TBB 配置 ==========
-if(BUILD_WITH_UBUNTU1804)
-    # Ubuntu 18.04 配置
-    function(extract_file filename extract_dir)
-        message(STATUS "Extract ${filename} to ${extract_dir} ...")
-        set(temp_dir ${extract_dir})
-        if(EXISTS ${temp_dir})
-            file(REMOVE_RECURSE ${temp_dir})
-        endif()
-        file(MAKE_DIRECTORY ${temp_dir})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xvzf ${filename}
-                WORKING_DIRECTORY ${temp_dir})
-    endfunction()
 
-    set(TBB_ROOT_DIR ${PROJECT_SOURCE_DIR}/thirdparty/tbb/oneTBB-2019_U8/oneTBB-2019_U8)
-    set(TBB_BUILD_DIR "tbb_build_dir=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
-    set(TBB_BUILD_PREFIX "tbb_build_prefix=tbb")
+# Ubuntu 20.04+ / 22.04 使用系统 TBB
+find_package(TBB REQUIRED)
+#================ UI ==================
+set(ui_libs
+    ${Pangolin_LIBRARIES}
+    ${PCL_LIBRARIES}
+)
 
-    extract_file(${PROJECT_SOURCE_DIR}/thirdparty/tbb/2019_U8.tar.gz ${PROJECT_SOURCE_DIR}/thirdparty/tbb/oneTBB-2019_U8)
+#================ SLAM Core ==================
+set(slam_core_libs
+    g2o::core
+    g2o::stuff
+    g2o_solver_cholmod
 
-    include(${TBB_ROOT_DIR}/cmake/TBBBuild.cmake)
+    ${OpenCV_LIBS}
+    ${PCL_LIBRARIES}
 
-    tbb_build(TBB_ROOT ${TBB_ROOT_DIR}
-            compiler=gcc-9
-            stdver=c++17
-            ${TBB_BUILD_DIR}
-            ${TBB_BUILD_PREFIX}
-            CONFIG_DIR
-            TBB_DIR)
+    ${yaml-cpp_LIBRARIES}
+    yaml-cpp
 
-    find_package(TBB REQUIRED)
+    TBB::tbb
+    ${OpenMP_CXX_LIBRARIES}
 
-    include_directories(${PROJECT_SOURCE_DIR}/thirdparty/tbb/oneTBB-2019_U8/oneTBB-2019_U8/include)
-    link_directories(${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/tbb_release)
+    glog
+    gflags
+)
 
-    # ===== 修改链接顺序：GLOG 放在最后 =====
-    set(third_party_libs
-            ${rclcpp_LIBRARIES}
-            ${rclpy_LIBRARIES}
-            ${sensor_msgs_LIBRARIES}
-            ${std_msgs_LIBRARIES}
-            ${geometry_msgs_LIBRARIES}
-            # ${velodyne_msgs_LIBRARIES}
-            # ${livox_ros_driver_LIBRARIES}
-            ${g2o_libs}
-            ${OpenCV_LIBS}
-            ${PCL_LIBRARIES}
-            ${Pangolin_LIBRARIES}
-            ${yaml-cpp_LIBRARIES}
-            yaml-cpp
-            TBB::tbb
-            ${rosbag2_cpp_LIBRARIES}
-            ${rosbag2_storage_LIBRARIES}
-            ${OpenMP_CXX_LIBRARIES}
-            # GLOG 和 gflags 放在最后
-            glog
-            gflags
-            )
-else()
-    # Ubuntu 20.04+ / 22.04 使用系统 TBB
-    find_package(TBB REQUIRED)
-    
-    # ===== 修改链接顺序：GLOG 放在最后 =====
-    set(third_party_libs
-            ${rclcpp_LIBRARIES}
-            ${rclpy_LIBRARIES}
-            ${sensor_msgs_LIBRARIES}
-            ${std_msgs_LIBRARIES}
-            ${geometry_msgs_LIBRARIES}
-            # ${velodyne_msgs_LIBRARIES}
-            # ${livox_ros_driver_LIBRARIES}
-            # g2o（使用现代写法）
-            g2o::core
-            g2o::stuff
-            g2o_solver_cholmod
-            ${rosbag2_cpp_LIBRARIES}
-            ${rosbag2_storage_LIBRARIES}
-            ${OpenCV_LIBS}
-            ${PCL_LIBRARIES}
-            ${Pangolin_LIBRARIES}
-            ${yaml-cpp_LIBRARIES}
-            yaml-cpp
-            TBB::tbb
-            ${OpenMP_CXX_LIBRARIES}
-            # GLOG 和 gflags 放在最后
-            glog
-            gflags
-            )
-endif()
+#================ ROS2 ==================
+set(ros2_libs
+    ${rclcpp_LIBRARIES}
+    ${rclpy_LIBRARIES}
+    ${rcl_interfaces_LIBRARIES}
+
+    ${sensor_msgs_LIBRARIES}
+    ${std_msgs_LIBRARIES}
+    ${geometry_msgs_LIBRARIES}
+
+    ${rosbag2_cpp_LIBRARIES}
+    ${rosbag2_storage_LIBRARIES}
+
+    ${pcl_ros_LIBRARIES}
+    ${pcl_conversions_LIBRARIES}
+)
+#================ Test ==================
+set(test_libs
+    GTest::gtest
+    GTest::gtest_main
+)
+#================ Compatibility ==================
+set(third_party_libs
+    ${slam_core_libs}
+)

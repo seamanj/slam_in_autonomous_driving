@@ -6,5 +6,5 @@ set_target_properties(ex1_run_imu_integration PROPERTIES
 )
 
 target_link_libraries(ex1_run_imu_integration
-        glog gflags ${PROJECT_NAME}.common
+        glog gflags ${PROJECT_NAME}.common ${PROJECT_NAME}.io
         )
