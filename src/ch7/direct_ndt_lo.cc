@@ -38,14 +38,15 @@ void DirectNDTLO::AddCloud(CloudPtr scan, SE3& pose) {
 
         // 重建local map
         scans_in_local_map_.emplace_back(scan_world);
+        if (scans_in_local_map_.size() > options_.num_kfs_in_local_map_) {
+            scans_in_local_map_.pop_front();
+        }
 
         local_map_.reset(new PointCloudType);
         for (auto& scan : scans_in_local_map_) {
             *local_map_ += *scan;
         }
-        LOG(INFO)
-        << "local map points = "
-        << local_map_->size();
+        
         if (options_.use_pcl_ndt_) {
             ndt_pcl_.setInputTarget(local_map_);
         } else {
