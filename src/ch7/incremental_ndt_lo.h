@@ -8,7 +8,8 @@
 #include "ch7/ndt_inc.h"
 #include "common/eigen_types.h"
 #include "common/point_types.h"
-#include "tools/pcl_map_viewer.h"
+// #include "tools/pcl_map_viewer.h"
+#include "tools/pangolin_map_viewer.h"
 
 namespace sad {
 
@@ -28,7 +29,8 @@ class IncrementalNDTLO {
 
     IncrementalNDTLO(Options options = Options()) : options_(options) {
         if (options_.display_realtime_cloud_) {
-            viewer_ = std::make_shared<PCLMapViewer>(0.5);
+            // viewer_ = std::make_shared<PCLMapViewer>(0.5);
+            viewer_ = std::make_shared<PangolinMapViewer>(0.5);
         }
 
         ndt_ = IncNdt3d(options_.ndt3d_options_);
@@ -56,7 +58,7 @@ class IncrementalNDTLO {
     int cnt_frame_ = 0;
 
     IncNdt3d ndt_;
-    std::shared_ptr<PCLMapViewer> viewer_ = nullptr;
+    std::shared_ptr<PangolinMapViewer> viewer_ = nullptr;
 };
 
 }  // namespace sad
