@@ -8,7 +8,9 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include "ch7/incremental_ndt_lo.h"
-#include "common/io_utils.h"
+// #include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
+#include "common/pointcloud_ros.h"
 #include "common/timer/timer.h"
 
 #include "common/lidar_utils_ros.h"
