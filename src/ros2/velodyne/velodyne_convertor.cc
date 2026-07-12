@@ -6,7 +6,7 @@
 
 #include <glog/logging.h>
 
-namespace sad::tools {
+namespace sad {
 
 VelodyneConvertor::VelodyneConvertor(const VelodyneConfig &config) : velodyne_config_(config) {
     packets_parser_ = std::make_shared<PacketsParser>();

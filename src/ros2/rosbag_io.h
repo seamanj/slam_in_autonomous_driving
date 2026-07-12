@@ -31,7 +31,7 @@
 #include "common/math_utils.h"
 #include "common/message_def.h"
 #include "common/odom.h"
-// #include "livox_ros_driver/msg/custom_msg.hpp"
+#include "livox_ros_driver/msg/custom_msg.hpp"
 #include "ros2/velodyne/velodyne_convertor.h"
 
 #include "ch3/utm_convert.h"
@@ -60,7 +60,7 @@ class RosbagIO {
     using PointCloud2Msg = sensor_msgs::msg::PointCloud2;
     using NavSatFixMsg = sensor_msgs::msg::NavSatFix;
     using ImuMsg = sensor_msgs::msg::Imu;
-    // using LivoxCustomMsg = livox_ros_driver::msg::CustomMsg;
+    using LivoxCustomMsg = livox_ros_driver::msg::CustomMsg;
     // using VelodynePacketMsg = velodyne_msgs::msg::VelodynePacket;
     // using VelodyneScanMsg = velodyne_msgs::msg::VelodyneScan;
 
@@ -75,7 +75,7 @@ class RosbagIO {
     using ImuHandle = std::function<bool(IMUPtr)>;
     using GNSSHandle = std::function<bool(GNSSPtr)>;
     using OdomHandle = std::function<bool(const Odom &)>;
-    // using LivoxHandle = std::function<bool(LivoxCustomMsg::SharedPtr)>;
+    using LivoxHandle = std::function<bool(LivoxCustomMsg::SharedPtr)>;
     // using VelodyneHandle = std::function<bool(VelodyneScanMsg::SharedPtr)>;
 
     // 遍历文件内容，调用回调函数
@@ -110,20 +110,19 @@ class RosbagIO {
 
     /// 根据数据集类型自动确定topic名称
     RosbagIO &AddAutoPointCloudHandle(PointCloud2Handle f) {
-        // if (dataset_type_ == DatasetType::WXB_3D) {
-        //     return AddHandle(wxb_lidar_topic, [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
-        //         auto deserialized_msg = std::make_shared<VelodyneScanMsg>();
-        //         rclcpp::Serialization<VelodyneScanMsg> serialization;
-        //         serialization.deserialize_message(msg.get(), deserialized_msg.get());
+        if (dataset_type_ == DatasetType::WXB_3D) {
+            return AddHandle(wxb_lidar_topic, [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
+                auto deserialized_msg = std::make_shared<PacketsMsg>();
+                rclcpp::Serialization<PacketsMsg> serialization;
+                serialization.deserialize_message(msg.get(), deserialized_msg.get());
 
-        //         FullCloudPtr cloud(new FullPointCloudType), cloud_out(new FullPointCloudType);
-        //         vlp_parser_.ProcessScan(deserialized_msg, cloud);
-        //         PointCloud2Msg::SharedPtr cloud_msg(new PointCloud2Msg);
-        //         pcl::toROSMsg(*cloud, *cloud_msg);
-        //         return f(cloud_msg);
-        //     });
-        // } else 
-        if (dataset_type_ == DatasetType::AVIA) {
+                FullCloudPtr cloud(new FullPointCloudType), cloud_out(new FullPointCloudType);
+                vlp_parser_.ProcessScan(deserialized_msg, cloud);
+                PointCloud2Msg::SharedPtr cloud_msg(new PointCloud2Msg);
+                pcl::toROSMsg(*cloud, *cloud_msg);
+                return f(cloud_msg);
+            });
+        } else if (dataset_type_ == DatasetType::AVIA) {
             // AVIA 不能直接获取point cloud 2
             return *this;
         } else {
@@ -170,14 +169,14 @@ class RosbagIO {
     }
 
     /// livox msg 处理
-    // RosbagIO &AddLivoxHandle(LivoxHandle f) {
-    //     return AddHandle(GetLidarTopicName(), [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
-    //         auto livox_msg = std::make_shared<LivoxCustomMsg>();
-    //         rclcpp::Serialization<LivoxCustomMsg> serialization;
-    //         serialization.deserialize_message(msg.get(), livox_msg.get());
-    //         return f(livox_msg);
-    //     });
-    // }
+    RosbagIO &AddLivoxHandle(LivoxHandle f) {
+        return AddHandle(GetLidarTopicName(), [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
+            auto livox_msg = std::make_shared<LivoxCustomMsg>();
+            rclcpp::Serialization<LivoxCustomMsg> serialization;
+            serialization.deserialize_message(msg.get(), livox_msg.get());
+            return f(livox_msg);
+        });
+    }
 
     /// wxb的velodyne packets处理
     RosbagIO &AddVelodyneHandle(const std::string &topic_name, FullPointCloudHandle f) {
@@ -211,7 +210,7 @@ class RosbagIO {
     DatasetType dataset_type_;
 
     // packets driver
-    tools::VelodyneConvertor vlp_parser_;
+    VelodyneConvertor vlp_parser_;
 };
 
 }  // namespace sad

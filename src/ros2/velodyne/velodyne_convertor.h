@@ -7,7 +7,7 @@
 #include "ros2/velodyne/velodyne_ros.h"
 
 
-namespace sad::tools {
+namespace sad {
 
 /// velodyne输出的packets转换成pointcloud格式
 /// 实质上只是对packets_parser外面再包了一层

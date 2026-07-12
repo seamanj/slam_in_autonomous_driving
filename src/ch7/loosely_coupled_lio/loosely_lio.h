@@ -8,8 +8,11 @@
 #include "ch3/eskf.hpp"
 #include "ch3/static_imu_init.h"
 #include "ch7/incremental_ndt_lo.h"
-#include "ch7/loosely_coupled_lio/cloud_convert.h"
-#include "ch7/loosely_coupled_lio/measure_sync.h"
+#include "ros2/livox/cloud_convert.h"
+#include "ros2/livox/measure_sync.h"
+
+#include "ros2/livox/cloud_convert.h"
+#include "ros2/livox/measure_sync.h"
 
 #include "tools/ui/pangolin_window.h"
 

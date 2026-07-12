@@ -5,7 +5,7 @@
 #ifndef FUSION_VELODYNE_CONFIG_H
 #define FUSION_VELODYNE_CONFIG_H
 
-namespace sad::tools {
+namespace sad {
 
 /// velodyne的配置参数
 struct VelodyneConfig {

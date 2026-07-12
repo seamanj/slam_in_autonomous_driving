@@ -66,6 +66,10 @@ void CloudConvert::AviaHandler(const livox_ros_driver::msg::CustomMsg::SharedPtr
             cloud_out_.points.push_back(cloud_full_[i]);
         }
     }
+
+    cloud_out_.width = static_cast<uint32_t>(cloud_out_.points.size());
+    cloud_out_.height = 1;
+    cloud_out_.is_dense = true;
 }
 
 void CloudConvert::Oust64Handler(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
@@ -92,6 +96,9 @@ void CloudConvert::Oust64Handler(const sensor_msgs::msg::PointCloud2::SharedPtr 
 
         cloud_out_.points.push_back(added_pt);
     }
+    cloud_out_.width = static_cast<uint32_t>(cloud_out_.points.size());
+    cloud_out_.height = 1;
+    cloud_out_.is_dense = true;
 }
 
 void CloudConvert::VelodyneHandler(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
@@ -171,6 +178,10 @@ void CloudConvert::VelodyneHandler(const sensor_msgs::msg::PointCloud2::SharedPt
             cloud_out_.points.push_back(added_pt);
         }
     }
+     // 修复 PCL 点云元数据
+    cloud_out_.width = static_cast<uint32_t>(cloud_out_.points.size());
+    cloud_out_.height = 1;
+    cloud_out_.is_dense = true;
 }
 
 void CloudConvert::LoadFromYAML(const std::string &yaml_file) {

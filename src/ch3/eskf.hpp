@@ -217,6 +217,12 @@ using ESKFF = ESKF<float>;
 
 template <typename S>
 bool ESKF<S>::Predict(const IMU& imu) {
+    LOG(INFO)
+    << std::setprecision(16)
+    << "imu.timestamp = " << imu.timestamp_
+    << ", current_time = " << current_time_;
+
+
     assert(imu.timestamp_ >= current_time_);
 
     double dt = imu.timestamp_ - current_time_;
@@ -228,9 +234,13 @@ bool ESKF<S>::Predict(const IMU& imu) {
     }
 
     // nominal state 递推
+    LOG(INFO) << "A";
     VecT new_p = p_ + v_ * dt + 0.5 * (R_ * (imu.acce_ - ba_)) * dt * dt + 0.5 * g_ * dt * dt;
+    LOG(INFO) << "B";
     VecT new_v = v_ + R_ * (imu.acce_ - ba_) * dt + g_ * dt;
+    LOG(INFO) << "C";
     SO3 new_R = R_ * SO3::exp((imu.gyro_ - bg_) * dt);
+    LOG(INFO) << "D";
 
     R_ = new_R;
     v_ = new_v;
@@ -250,7 +260,9 @@ bool ESKF<S>::Predict(const IMU& imu) {
 
     // mean and cov prediction
     dx_ = F * dx_;  // 这行其实没必要算，dx_在重置之后应该为零，因此这步可以跳过，但F需要参与Cov部分计算，所以保留
+    LOG(INFO) << "E";
     cov_ = F * cov_.eval() * F.transpose() + Q_;
+    LOG(INFO) << "F";
     current_time_ = imu.timestamp_;
     return true;
 }

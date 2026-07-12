@@ -14,7 +14,7 @@
 #include "velodyne_msgs/msg/velodyne_packet.hpp"
 #include "velodyne_msgs/msg/velodyne_scan.hpp"
 
-namespace sad::tools {
+namespace sad {
 
 /// packets协议解析
 class PacketsParser {

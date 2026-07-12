@@ -54,7 +54,7 @@ struct FullPointType {
     float radius = 0;
     uint8_t intensity = 0;
     uint8_t ring = 0;
-    uint8_t angle = 0;
+    uint16_t angle = 0;
     double time = 0;
     float height = 0;
 

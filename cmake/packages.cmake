@@ -55,7 +55,7 @@ find_package(velodyne_msgs REQUIRED)
 
 # ========== livox_ros_driver ==========
 # 查找 livox_ros_driver（如果还没构建）
-# find_package(livox_ros_driver REQUIRED)
+find_package(livox_ros_driver REQUIRED)
 
 # ========== 添加包含目录 ==========
 include_directories(${angles_INCLUDE_DIRS})

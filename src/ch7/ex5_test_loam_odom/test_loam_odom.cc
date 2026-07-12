@@ -6,8 +6,10 @@
 #include <glog/logging.h>
 
 #include "ch7/loam-like/loam_like_odom.h"
-#include "common/io_utils.h"
+// #include "common/io_utils.h"
 #include "common/timer/timer.h"
+
+#include "ros2/rosbag_io.h"
 
 DEFINE_string(bag_path, "./dataset/sad/wxb/test1.bag", "path to wxb bag");
 DEFINE_string(topic, "/velodyne_packets_1", "topic of lidar packets");
