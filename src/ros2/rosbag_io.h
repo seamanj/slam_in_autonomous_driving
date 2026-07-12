@@ -32,7 +32,7 @@
 #include "common/message_def.h"
 #include "common/odom.h"
 // #include "livox_ros_driver/msg/custom_msg.hpp"
-// #include "tools/pointcloud_convert/velodyne_convertor.h"
+#include "ros2/velodyne/velodyne_convertor.h"
 
 #include "ch3/utm_convert.h"
 
@@ -180,18 +180,18 @@ class RosbagIO {
     // }
 
     /// wxb的velodyne packets处理
-    // RosbagIO &AddVelodyneHandle(const std::string &topic_name, FullPointCloudHandle f) {
-    //     return AddHandle(topic_name, [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
-    //         auto velodyne_msg = std::make_shared<VelodyneScanMsg>();
-    //         rclcpp::Serialization<VelodyneScanMsg> serialization;
-    //         serialization.deserialize_message(msg.get(), velodyne_msg.get());
+    RosbagIO &AddVelodyneHandle(const std::string &topic_name, FullPointCloudHandle f) {
+        return AddHandle(topic_name, [f, this](std::shared_ptr<rclcpp::SerializedMessage> msg, const std::string &topic) -> bool {
+            auto velodyne_msg = std::make_shared<PacketsMsg>();
+            rclcpp::Serialization<PacketsMsg> serialization;
+            serialization.deserialize_message(msg.get(), velodyne_msg.get());
 
-    //         FullCloudPtr cloud(new FullPointCloudType), cloud_out(new FullPointCloudType);
-    //         vlp_parser_.ProcessScan(velodyne_msg, cloud);
+            FullCloudPtr cloud(new FullPointCloudType), cloud_out(new FullPointCloudType);
+            vlp_parser_.ProcessScan(velodyne_msg, cloud);
 
-    //         return f(cloud);
-    //     });
-    // }
+            return f(cloud);
+        });
+    }
 
     /// IMU
     RosbagIO &AddImuHandle(ImuHandle f);
@@ -211,7 +211,7 @@ class RosbagIO {
     DatasetType dataset_type_;
 
     // packets driver
-    // tools::VelodyneConvertor vlp_parser_;
+    tools::VelodyneConvertor vlp_parser_;
 };
 
 }  // namespace sad

@@ -8,7 +8,9 @@ target_link_libraries(ex4_test_feature_extraction
         ${PROJECT_NAME}.ch5
         ${PROJECT_NAME}.ch7
         ${PROJECT_NAME}.common
+        ${PROJECT_NAME}.ros2
         ${third_party_libs}
+        
         )
 
 

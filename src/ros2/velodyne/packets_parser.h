@@ -8,7 +8,7 @@
 
 #include "common/lidar_utils.h"
 #include "common/point_types.h"
-#include "tools/pointcloud_convert/velodyne_config.h"
+#include "ros2/velodyne/velodyne_config.h"
 
 // ROS 2 消息类型
 #include "velodyne_msgs/msg/velodyne_packet.hpp"

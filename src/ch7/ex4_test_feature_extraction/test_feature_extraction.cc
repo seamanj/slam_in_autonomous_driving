@@ -6,7 +6,9 @@
 #include <glog/logging.h>
 
 #include "ch7/loam-like/feature_extraction.h"
-#include "common/io_utils.h"
+// #include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
+#include "common/pointcloud_ros.h"
 
 #include "common/timer/timer.h"
 #include "common/point_cloud_utils.h"

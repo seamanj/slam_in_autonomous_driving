@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 
     if (FLAGS_display_map) {
         // 把地图存下来
-        ndt_lo.SaveMap("./data/ch7/map.pcd");
+        ndt_lo.SaveMap("./data/ch7/map_ex3.pcd");
     }
 
     sad::common::Timer::PrintAll();

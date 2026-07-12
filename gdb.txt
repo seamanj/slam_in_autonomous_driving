@@ -66,3 +66,10 @@ QuaternionIfLi1EE = 对齐 (Q=1)
 
 
 cmake --build build/build_main -j32
+
+rm -rf build/build_main/CMakeCache.txt
+cmake -B build/build_main -S .
+
+
+ros1 to ros2 convert: rosbags-convert --src /home/seamanj/Software/dataset/sad/2dmapping/floor1.bag \
+--dst /home/seamanj/Software/dataset/sad/2dmapping/floor1_ros2

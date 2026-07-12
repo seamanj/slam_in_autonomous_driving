@@ -2,8 +2,10 @@
 
 #include "common/lidar_utils.h"
 #include "common/point_types.h"
-#include "tools/pointcloud_convert/packets_parser.h"
-#include "tools/pointcloud_convert/velodyne_config.h"
+#include "ros2/velodyne/packets_parser.h"
+#include "ros2/velodyne/velodyne_config.h"
+#include "ros2/velodyne/velodyne_ros.h"
+
 
 namespace sad::tools {
 

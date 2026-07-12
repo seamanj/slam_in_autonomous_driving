@@ -46,7 +46,7 @@ void IncrementalNDTLO::AddCloud(CloudPtr scan, SE3& pose, bool use_guess) {
         last_kf_pose_ = pose;
         cnt_frame_ = 0;
         // 放入ndt内部的local map
-        ndt_.AddCloud(scan_world);
+        ndt_.AddCloud(scan_world); // tj : 这里会调用 updateVoxel
     }
 
     if (viewer_ != nullptr) {

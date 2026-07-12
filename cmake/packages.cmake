@@ -50,7 +50,7 @@ find_package(rosbag2_storage REQUIRED)
 
 # ========== velodyne_msgs ==========
 # 查找 velodyne_msgs（如果还没构建）
-# find_package(velodyne_msgs REQUIRED)
+find_package(velodyne_msgs REQUIRED)
 #find_package(velodyne_driver REQUIRED)    # 可选
 
 # ========== livox_ros_driver ==========
