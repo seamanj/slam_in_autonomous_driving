@@ -105,7 +105,7 @@ void FeatureExtraction::ExtractFromSector(const CloudPtr &pc_in, std::vector<IdA
                 double diffX = pc_in->points[ind + k].x - pc_in->points[ind + k - 1].x;
                 double diffY = pc_in->points[ind + k].y - pc_in->points[ind + k - 1].y;
                 double diffZ = pc_in->points[ind + k].z - pc_in->points[ind + k - 1].z;
-                if (diffX * diffX + diffY * diffY + diffZ * diffZ > 0.05) {
+                if (diffX * diffX + diffY * diffY + diffZ * diffZ > 0.05) { // tj : 距离大可能就换物体了, 就不再屏蔽
                     break;
                 }
                 picked_points.push_back(ind + k);

@@ -23,3 +23,11 @@
 ## ROS 1 到 2 的转换
 ros1 to ros2 convert: rosbags-convert --src /home/seamanj/Software/dataset/sad/wxb/test1.bag \
 --dst /home/seamanj/Software/dataset/sad/wxb/test1_ros2
+
+
+rosbags-convert --src /home/seamanj/Software/dataset/sad/nclt/20120429.bag \
+--dst /home/seamanj/Software/dataset/sad/nclt/20120429_ros2
+
+
+rosbags-convert --src /home/seamanj/Software/dataset/sad/avia/HKU_MB_2020-09-20-13-34-51.bag \
+--dst /home/seamanj/Software/dataset/sad/avia/HKU_MB_2020-09-20-13-34-51_ros2
