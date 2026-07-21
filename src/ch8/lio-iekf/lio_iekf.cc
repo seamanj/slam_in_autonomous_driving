@@ -193,9 +193,9 @@ void LioIEKF::Predict() {
     }
 }
 
-void LioIEKF::PCLCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LioIEKF::PCLCallBack(const sensor_msgs::msg::PointCloud2::ConstPtr &msg) { sync_->ProcessCloud(msg); }
 
-void LioIEKF::LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LioIEKF::LivoxPCLCallBack(const livox_ros_driver::msg::CustomMsg::ConstPtr &msg) { sync_->ProcessCloud(msg); }
 
 void LioIEKF::IMUCallBack(IMUPtr msg_in) { sync_->ProcessIMU(msg_in); }
 

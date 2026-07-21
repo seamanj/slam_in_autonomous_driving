@@ -11,9 +11,6 @@
 #include "ros2/livox/cloud_convert.h"
 #include "ros2/livox/measure_sync.h"
 
-#include "ros2/livox/cloud_convert.h"
-#include "ros2/livox/measure_sync.h"
-
 #include "tools/ui/pangolin_window.h"
 
 namespace sad {

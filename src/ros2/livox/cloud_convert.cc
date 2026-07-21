@@ -6,12 +6,12 @@
 
 namespace sad {
 
-void CloudConvert::Process(const livox_ros_driver::msg::CustomMsg::SharedPtr msg, FullCloudPtr &pcl_out) {
+void CloudConvert::Process(const livox_ros_driver::msg::CustomMsg::ConstSharedPtr msg, FullCloudPtr &pcl_out) {
     AviaHandler(msg);
     *pcl_out = cloud_out_;
 }
 
-void CloudConvert::Process(const sensor_msgs::msg::PointCloud2::SharedPtr msg, FullCloudPtr &pcl_out) {
+void CloudConvert::Process(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg, FullCloudPtr &pcl_out) {
     switch (lidar_type_) {
         case LidarType::OUST64:
             Oust64Handler(msg);
@@ -28,7 +28,7 @@ void CloudConvert::Process(const sensor_msgs::msg::PointCloud2::SharedPtr msg, F
     *pcl_out = cloud_out_;
 }
 
-void CloudConvert::AviaHandler(const livox_ros_driver::msg::CustomMsg::SharedPtr msg) {
+void CloudConvert::AviaHandler(const livox_ros_driver::msg::CustomMsg::ConstSharedPtr msg) {
     cloud_out_.clear();
     cloud_full_.clear();
     int plsize = msg->point_num;
@@ -72,7 +72,7 @@ void CloudConvert::AviaHandler(const livox_ros_driver::msg::CustomMsg::SharedPtr
     cloud_out_.is_dense = true;
 }
 
-void CloudConvert::Oust64Handler(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
+void CloudConvert::Oust64Handler(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
     cloud_out_.clear();
     cloud_full_.clear();
     pcl::PointCloud<ouster_ros::Point> pl_orig;
@@ -101,7 +101,7 @@ void CloudConvert::Oust64Handler(const sensor_msgs::msg::PointCloud2::SharedPtr 
     cloud_out_.is_dense = true;
 }
 
-void CloudConvert::VelodyneHandler(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
+void CloudConvert::VelodyneHandler(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
     cloud_out_.clear();
     cloud_full_.clear();
 

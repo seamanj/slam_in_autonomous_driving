@@ -211,9 +211,9 @@ void LioPreinteg::Predict() {
     }
 }
 
-void LioPreinteg::PCLCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LioPreinteg::PCLCallBack(const sensor_msgs::msg::PointCloud2::ConstPtr &msg) { sync_->ProcessCloud(msg); }
 
-void LioPreinteg::LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr &msg) { sync_->ProcessCloud(msg); }
+void LioPreinteg::LivoxPCLCallBack(const livox_ros_driver::msg::CustomMsg::ConstPtr &msg) { sync_->ProcessCloud(msg); }
 
 void LioPreinteg::IMUCallBack(IMUPtr msg_in) { sync_->ProcessIMU(msg_in); }
 
@@ -236,7 +236,7 @@ void LioPreinteg::Optimize() {
     using LinearSolverType = g2o::LinearSolverEigen<BlockSolverType::PoseMatrixType>;
 
     auto *solver = new g2o::OptimizationAlgorithmLevenberg(
-        g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+        std::make_unique<BlockSolverType>(std::make_unique<LinearSolverType>()));
     g2o::SparseOptimizer optimizer;
     optimizer.setAlgorithm(solver);
 

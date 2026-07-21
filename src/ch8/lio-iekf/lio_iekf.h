@@ -1,14 +1,18 @@
 #ifndef SAD_CH8_LASER_MAPPING_H
 #define SAD_CH8_LASER_MAPPING_H
 
-#include <livox_ros_driver/CustomMsg.h>
+// #include <livox_ros_driver/CustomMsg.h>
+#include <livox_ros_driver/msg/custom_msg.hpp>
 #include <pcl/filters/voxel_grid.h>
-#include <sensor_msgs/PointCloud2.h>
+// #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 /// 部分类直接使用ch7的结果
 #include "ch3/static_imu_init.h"
-#include "ch7/loosely_coupled_lio/cloud_convert.h"
-#include "ch7/loosely_coupled_lio/measure_sync.h"
+// #include "ch7/loosely_coupled_lio/cloud_convert.h"
+// #include "ch7/loosely_coupled_lio/measure_sync.h"
+#include "ros2/livox/cloud_convert.h"
+#include "ros2/livox/measure_sync.h"
 #include "ch7/ndt_inc.h"
 #include "ch8/lio-iekf/iekf.hpp"
 
@@ -33,8 +37,8 @@ class LioIEKF {
     bool Init(const std::string& config_yaml);
 
     /// 点云回调函数
-    void PCLCallBack(const sensor_msgs::PointCloud2::ConstPtr& msg);
-    void LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr& msg);
+    void PCLCallBack(const sensor_msgs::msg::PointCloud2::ConstPtr& msg);
+    void LivoxPCLCallBack(const livox_ros_driver::msg::CustomMsg::ConstPtr& msg);
 
     /// IMU回调函数
     void IMUCallBack(IMUPtr msg_in);

@@ -54,7 +54,7 @@ class MessageSync {
      * 处理sensor_msgs::PointCloud2点云
      * @param msg
      */
-    void ProcessCloud(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
+    void ProcessCloud(const sensor_msgs::msg::PointCloud2::ConstSharedPtr msg) {
         if (msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 < last_timestamp_lidar_) {
             LOG(ERROR) << "lidar loop back, clear buffer";
             lidar_buffer_.clear();
@@ -70,7 +70,7 @@ class MessageSync {
     }
 
     /// 处理Livox点云
-    void ProcessCloud(const livox_ros_driver::msg::CustomMsg::SharedPtr msg) {
+    void ProcessCloud(const livox_ros_driver::msg::CustomMsg::ConstSharedPtr msg) {
         if (msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 < last_timestamp_lidar_) {
             LOG(WARNING) << "lidar loop back, clear buffer";
             lidar_buffer_.clear();

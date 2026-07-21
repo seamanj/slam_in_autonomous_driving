@@ -5,8 +5,9 @@
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 
-#include "ch8/lio-iekf/lio_iekf.h"
-#include "common/io_utils.h"
+#include "ch8/lio-preinteg/lio_preinteg.h"
+// #include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include "common/sys_utils.h"
 #include "common/timer/timer.h"
 
@@ -23,16 +24,16 @@ int main(int argc, char** argv) {
 
     sad::RosbagIO rosbag_io(fLS::FLAGS_bag_path, sad::Str2DatasetType(FLAGS_dataset_type));
 
-    sad::LioIEKF lio;
+    sad::LioPreinteg lio;
     lio.Init(FLAGS_config);
 
     rosbag_io
-        .AddAutoPointCloudHandle([&](sensor_msgs::PointCloud2::Ptr cloud) -> bool {
-            sad::common::Timer::Evaluate([&]() { lio.PCLCallBack(cloud); }, "IEKF lio");
+        .AddAutoPointCloudHandle([&](sensor_msgs::msg::PointCloud2::Ptr cloud) -> bool {
+            sad::common::Timer::Evaluate([&]() { lio.PCLCallBack(cloud); }, "Pre-Integration lio");
             return true;
         })
-        .AddLivoxHandle([&](const livox_ros_driver::CustomMsg::ConstPtr& msg) -> bool {
-            sad::common::Timer::Evaluate([&]() { lio.LivoxPCLCallBack(msg); }, "IEKF lio");
+        .AddLivoxHandle([&](const livox_ros_driver::msg::CustomMsg::ConstPtr& msg) -> bool {
+            sad::common::Timer::Evaluate([&]() { lio.LivoxPCLCallBack(msg); }, "Pre-Integration lio");
             return true;
         })
         .AddImuHandle([&](IMUPtr imu) {
