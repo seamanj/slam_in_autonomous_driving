@@ -31,7 +31,7 @@ void IncNdt3d::AddCloud(CloudPtr cloud_world) {
             }
         } else {
             // 栅格存在，添加点，更新缓存
-            iter->second->second.AddPoint(pt);
+            iter->second->second.AddPoint(pt); // tj :  没有估计的时候, 才管总共的点num_pts_
             data_.splice(data_.begin(), data_, iter->second);  // 更新的那个放到最前
             iter->second = data_.begin();                      // grids时也指向最前
         }

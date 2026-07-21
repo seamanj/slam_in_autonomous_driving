@@ -161,7 +161,7 @@ SE3 LoamLikeOdom::AlignWithLocalMap(CloudPtr edge, CloudPtr surf) {
                         nn_eigen.emplace_back(ToVec3d(local_map_edge_->points[n]));
                     }
 
-                    // point to point residual
+                    // point to line residual
                     Vec3d d, p0;
                     if (!math::FitLine(nn_eigen, p0, d, options_.max_line_distance_)) {
                         return;
