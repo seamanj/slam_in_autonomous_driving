@@ -11,7 +11,7 @@
 
 #include "common/eigen_types.h"
 #include "common/point_cloud_utils.h"
-#include "keyframe.h"
+#include "../keyframe.h"
 #include "common/point_cloud_utils.h"
 
 DEFINE_string(map_path, "./data/ch9/", "导出数据的目录");

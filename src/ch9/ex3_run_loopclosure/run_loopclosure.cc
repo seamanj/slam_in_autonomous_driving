@@ -4,7 +4,7 @@
 
 #include <gflags/gflags.h>
 #include <glog/logging.h>
-#include "loopclosure.h"
+#include "../loopclosure.h"
 
 DEFINE_string(config_yaml, "./config/mapping.yaml", "配置文件");
 

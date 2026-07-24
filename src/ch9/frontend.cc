@@ -4,8 +4,8 @@
 
 #include "frontend.h"
 #include "ch8/lio-iekf/lio_iekf.h"
-#include "common/io_utils.h"
-
+// #include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include <yaml-cpp/yaml.h>
 
 namespace sad {
@@ -51,7 +51,7 @@ void Frontend::Run() {
 
     // 再运行LIO
     rosbag_io
-        .AddAutoPointCloudHandle([&](sensor_msgs::PointCloud2::Ptr cloud) -> bool {
+        .AddAutoPointCloudHandle([&](sensor_msgs::msg::PointCloud2::Ptr cloud) -> bool {
             lio_->PCLCallBack(cloud);
             ExtractKeyFrame(lio_->GetCurrentState());
             return true;

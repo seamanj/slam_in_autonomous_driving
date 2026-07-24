@@ -13,7 +13,7 @@ DEFINE_string(dump_to, "./data/ch9/", "导出的目标路径");
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
 
-#include "keyframe.h"
+#include "../keyframe.h"
 #include "common/point_cloud_utils.h"
 
 /**

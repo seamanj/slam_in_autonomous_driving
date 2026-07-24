@@ -246,10 +246,10 @@ bool IESKF<S>::UpdateUsingCustomObserve(IESKF::CustomObsFunc obs) {
         }
     }
 
-    // update P
+    // update P  : 在融合了 LiDAR/GPS/视觉之后，我到底还剩多少不确定性？
     cov_ = (Mat18T::Identity() - Qk * HTVH) * Pk;
 
-    // project P
+    // project P : 误差定义变了，我需要把协方差搬到新的误差坐标系
     Mat18T J = Mat18T::Identity();
     Vec3d dtheta = (R_.inverse() * start_R).log();
     J.template block<3, 3>(6, 6) = Mat3T::Identity() - 0.5 * SO3::hat(dtheta);
