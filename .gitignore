@@ -49,6 +49,8 @@ data/ch6/*.png
 data/ch7/**.pcd
 **DS_Store
 
+
+data/ch9_bak/
 data/ch9/**.pcd
 **/*.pcd
 data/ch3/state.txt
