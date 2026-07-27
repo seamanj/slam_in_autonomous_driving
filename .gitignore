@@ -49,7 +49,7 @@ data/ch6/*.png
 data/ch7/**.pcd
 **DS_Store
 
-
+data/ch9/
 data/ch9_bak/
 data/ch9/**.pcd
 **/*.pcd

@@ -6,7 +6,8 @@
 #include <glog/logging.h>
 #include <yaml-cpp/yaml.h>
 
-#include "common/io_utils.h"
+// #include "common/io_utils.h"
+#include "ros2/rosbag_io.h"
 #include "fusion.h"
 
 DEFINE_string(config_yaml, "./config/mapping.yaml", "配置文件");
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
             fusion.ProcessRTK(gnss);
             return true;
         })
-        .AddAutoPointCloudHandle([&](sensor_msgs::PointCloud2::Ptr cloud) -> bool {
+        .AddAutoPointCloudHandle([&](sensor_msgs::msg::PointCloud2::Ptr cloud) -> bool {
             fusion.ProcessPointCloud(cloud);
             return true;
         })

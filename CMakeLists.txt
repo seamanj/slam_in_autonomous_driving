@@ -3,7 +3,7 @@ project(slam_in_auto_driving)
 
 # 设置编译类型
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 set(CMAKE_CXX_STANDARD 17)

@@ -182,6 +182,7 @@ bool Fusion::SearchRTK() {
         status_ = Status::WORKING;
 
         /// 重置滤波器状态
+        // tj : 因为之前只有IMU的预测，没有观测，所以状态不可靠，这里直接用匹配结果重置状态
         auto state = eskf_.GetNominalState();
         state.R_ = max_ele->result_pose_.so3();
         state.p_ = max_ele->result_pose_.translation();
@@ -230,7 +231,8 @@ bool Fusion::LidarLocalization() {
     SE3 pred = eskf_.GetNominalSE3();
     LoadMap(pred);
 
-    ndt_.setInputCloud(current_scan_);
+    // ndt_.setInputCloud(current_scan_);
+    ndt_.setInputSource(current_scan_); 
     CloudPtr output(new PointCloudType);
     ndt_.align(*output, pred.matrix().cast<float>());
 
@@ -311,6 +313,6 @@ void Fusion::LoadMapIndex() {
 
 void Fusion::ProcessIMU(IMUPtr imu) { sync_->ProcessIMU(imu); }
 
-void Fusion::ProcessPointCloud(sensor_msgs::PointCloud2::Ptr cloud) { sync_->ProcessCloud(cloud); }
+void Fusion::ProcessPointCloud(sensor_msgs::msg::PointCloud2::Ptr cloud) { sync_->ProcessCloud(cloud); }
 
 }  // namespace sad

@@ -13,3 +13,6 @@ target_link_libraries(run_fusion_offline
         ${PROJECT_NAME}.ch10
         ${third_party_libs}
         )
+
+set_target_properties(run_fusion_offline PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/ch10)

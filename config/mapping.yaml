@@ -3,9 +3,9 @@ bag_path: /home/seamanj/Software/dataset/sad/nclt/20130110_ros2/20130110_ros2.db
 lio_yaml: ./config/velodyne_nclt.yaml
 map_data: ./data/ch9/map_data/
 origin:
-  - 276726.56265798624
-  - 4685961.4821172003
-  - 272.80900000000003
+  - 276727.12782504963
+  - 4685961.6148576168
+  - 272.52100000000002
 rtk_has_rot: false
 rtk_outlier_th: 1.0
 rtk_pos_noise: 2.0

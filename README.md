@@ -25,8 +25,8 @@ ros1 to ros2 convert: rosbags-convert --src /home/seamanj/Software/dataset/sad/w
 --dst /home/seamanj/Software/dataset/sad/wxb/test1_ros2
 
 
-rosbags-convert --src /home/seamanj/Software/dataset/sad/nclt/20130110.bag \
---dst /home/seamanj/Software/dataset/sad/nclt/20130110_ros2
+rosbags-convert --src /home/seamanj/Software/dataset/sad/nclt/20120115.bag \
+--dst /home/seamanj/Software/dataset/sad/nclt/20120115_ros2
 
 
 rosbags-convert --src /home/seamanj/Software/dataset/sad/avia/HKU_MB_2020-09-20-13-34-51.bag \

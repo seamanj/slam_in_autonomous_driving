@@ -13,14 +13,16 @@
 #include "common/message_def.h"
 #include "common/point_types.h"
 
-#include "ch7/loosely_coupled_lio/cloud_convert.h"
-#include "ch7/loosely_coupled_lio/measure_sync.h"
+// #include "ch7/loosely_coupled_lio/cloud_convert.h"
+// #include "ch7/loosely_coupled_lio/measure_sync.h"
+#include "ros2/livox/cloud_convert.h"
+#include "ros2/livox/measure_sync.h"
 
 #include "tools/ui/pangolin_window.h"
 
 #include <pcl/registration/ndt.h>
-#include <sensor_msgs/PointCloud2.h>
-
+// #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 namespace sad {
 
 /**
@@ -43,7 +45,7 @@ class Fusion {
     /// 处理输入的RTK
     void ProcessRTK(GNSSPtr gnss);
     void ProcessIMU(IMUPtr imu);
-    void ProcessPointCloud(sensor_msgs::PointCloud2::Ptr cloud);
+    void ProcessPointCloud(sensor_msgs::msg::PointCloud2::Ptr cloud);
 
    private:
     /// 读取某个点附近的地图
